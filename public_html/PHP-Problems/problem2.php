@@ -8,7 +8,14 @@ function getTotal($arr) {
     $total = 0.00;
     //note: use the $arr variable, don't directly touch $a1-$a4
     //TODO do adding here
+    $i=0;
+    $sum = 0;
+    while($i<count($arr)){
+        $sum += $arr[$i];
+        $i++;
+    }
     //TODO do rounding stuff here (round to two decimals i.e., 0.10, 0.01, 0.00)
+    $total = round($sum,2);    
     echo "The total is " . var_export($total, true);
 }
 echo "Problem 2: Adding Floats<br>";
