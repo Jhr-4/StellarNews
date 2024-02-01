@@ -11,7 +11,9 @@ function bePositive($arr) {
     //TODO use echo to output all of the values as positive (even if they were originally positive) and maintain the original datatype
     //hint: may want to use var_dump() or similar to show final data types
     
-    
+    //Name: Jay Rana,
+    //UCID:  jhr4,
+    //Date:  2/1/24
     foreach($arr as $i){
         if(is_string($i)){
             $str = (string) sqrt($i*$i);

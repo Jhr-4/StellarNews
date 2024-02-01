@@ -8,6 +8,10 @@ function getTotal($arr) {
     $total = 0.00;
     //note: use the $arr variable, don't directly touch $a1-$a4
     //TODO do adding here
+    
+    //Name: Jay Rana,
+    //UCID:  jhr4,
+    //Date:  2/1/24
     $i=0;
     $sum = 0;
     while($i<count($arr)){
