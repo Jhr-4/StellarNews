@@ -11,7 +11,7 @@ function getTotal($arr) {
     
     //Name: Jay Rana,
     //UCID:  jhr4,
-    //Date:  2/1/24
+    //Date:  2/5/24
     $i=0;
     $sum = 0;
     while($i<count($arr)){
@@ -19,7 +19,9 @@ function getTotal($arr) {
         $i++;
     }
     //TODO do rounding stuff here (round to two decimals i.e., 0.10, 0.01, 0.00)
-    $total = round($sum,2);    
+    $roundTotal = round($sum,2);    
+    $formattedTotal = number_format($roundTotal, 2);
+    $total = $formattedTotal;
     echo "The total is " . var_export($total, true);
 }
 echo "Problem 2: Adding Floats<br>";
