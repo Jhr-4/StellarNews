@@ -8,11 +8,27 @@
         window.addEventListener("load", () => {
             console.log("loaded via javascript");
             //TODO: add any extra onload processing you may need here
+        
+            let URL = document.URL;
+            let listURL = [URL];
+            if(URL.split("#")[1]){
+                getCurrentSelection();
+            }
+
+            links = document.getElementsByTagName("a")
+            for (let i=0;links.length; i++){
+                link = links[i];
+                link.addEventListener("click", getCurrentSelection);
+            };
+
         });
         function getCurrentSelection() {
             setTimeout(() => {
                 //added this delay here as some solutions may require it to update properly (i.e., click code may complete before the navigation changes)
                 //TODO: add code for processing the current selection 
+                let URL = document.URL;
+                let page = URL.split("#")[1];
+                updateCurrentPage(page);
 
                 //Note: likely you'll want to call updateCurrentPage towards the end
             }, 100);
@@ -20,6 +36,34 @@
     </script>
     <style>
         /* TODO: make edits here */
+        
+        ul {
+            list-style-type: "\2713";
+        }
+
+        nav {
+            background-color: bisque;
+            font-size: xx-large;
+            border: 1em solid burlywood;
+
+        }
+
+        nav ul {
+            list-style-type: none;
+        }
+
+        nav li {
+            display: inline;
+        }
+
+        nav a:hover{
+            color:lightcoral;
+        }
+
+        h1, a{
+            text-transform: capitalize;
+        }
+
     </style>
     <!-- make the necessary edits above this line -->
 
