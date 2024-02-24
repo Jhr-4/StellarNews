@@ -73,13 +73,19 @@ if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"
     }
 
     //sanatize removes all illegal characters 
-    $email = filter_var($email, FILTER_SANITIZE_EMAIL);
+    //$email = filter_var($email, FILTER_SANITIZE_EMAIL);
+    $email = sanitize_email($email);
+    
     //validate
-    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+    /*if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        echo "Please type a valid email <br>";
+        $hasError = true;
+    }*/
+    if(!is_valid_email($email)){
         echo "Please type a valid email <br>";
         $hasError = true;
     }
-    
+
     if(empty($password)){
         echo "Password must be provided <br>";
         $hasError = true;
