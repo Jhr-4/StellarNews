@@ -68,7 +68,7 @@ if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"
     //TODO 3: validate/use
     $hasError = false;
     if(empty($email)){
-        echo "Email must be provided <br>";
+        flash("Email must be provided <br>");
         $hasError = true;
     }
 
@@ -82,24 +82,24 @@ if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"
         $hasError = true;
     }*/
     if(!is_valid_email($email)){
-        echo "Please type a valid email <br>";
+        flash("Please type a valid email <br>");
         $hasError = true;
     }
 
     if(empty($password)){
-        echo "Password must be provided <br>";
+        flash("Password must be provided <br>");
         $hasError = true;
     }
     if (empty($confirm)) {
-        echo "Confirm Password must be provided <br>";
+        flash("Confirm Password must be provided <br>");
         $hasError = true;
     }
     if(strlen($password) < 8){
-        echo "Password must be at least 8 characters long <br>";
+        flash("Password must be at least 8 characters long <br>");
         $hasError = true;
     }
     if(strlen($password) > 0 && $password !== $confirm){
-        echo "Password must be match <br>";
+        flash("Password must be match <br>");
         $hasError = true;
     }
     if(!$hasError){
@@ -115,11 +115,14 @@ if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"
         //:password & :email is placeholder;  not $varaibles because user can put in drop table as password
         try {
             $stmt->execute([":email" => $email, ":password" => $hash]);
-            echo "Successfully registered!";
+            flash("Successfully registered!");
         } catch (Exception $e) {
-            echo "There was a problem registering";
-            echo "<pre>" . var_export($e, true) . "</pre>";
+            flash("There was a problem registering");
+            flash("<pre>" . var_export($e, true) . "</pre>");
         }
     }
 }
+?>
+<?php
+require(__DIR__ . "/../../partials/flash.php");
 ?>

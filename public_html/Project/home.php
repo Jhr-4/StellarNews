@@ -11,9 +11,10 @@ else{
 }*/
 
 if(is_logged_in()){
-  echo "welcome, " . get_user_email();
-}else {
-  echo "You're not logged in";
+  //flash("Welcome, " . get_user_email());
+} else {
+  flash("You're not logged in");
 }
+require(__DIR__."/../../partials/flash.php");
 
 ?>
