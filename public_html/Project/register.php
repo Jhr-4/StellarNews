@@ -4,15 +4,19 @@ require(__DIR__ . "/../../partials/nav.php");
 <form onsubmit="return validate(this)" method="POST">
     <div>
         <label for="email">Email</label>
-        <input id="email" type="email" name="email"  required/> <!--add back required-->
+        <input id="email" type="email" name="email"  required/>
+    </div>
+    <div>
+        <label for="username">Username</label>
+        <input id="username" type="text" name="username"  required/>
     </div>
     <div>
         <label for="pw">Password</label>
-        <input type="password" id="pw" name="password" required minlength="8" /> <!--add back required-->
+        <input type="password" id="pw" name="password" required minlength="8" required/>
     </div>
     <div>
         <label for="confirm">Confirm</label>
-        <input type="password" name="confirm" required minlength="8" /> <!--add back required-->
+        <input type="password" name="confirm" required minlength="8" required/>
     </div>
     <input type="submit" value="Register" />
 </form>
@@ -60,11 +64,12 @@ require(__DIR__ . "/../../partials/nav.php");
 
 <?php
 //TODO 2: add PHP Code
-if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"])){
+if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"]) && isset($_POST["username"])){
     $email = se($_POST, "email", "", false);
-    $password = se($_POST, "password", "", false);
+    $password = se($_POST, "password", "", false); 
     $confirm = se($_POST,"confirm", "", false);
- 
+    $username = se($_POST,"username", "", false);
+
     //TODO 3: validate/use
     $hasError = false;
     if(empty($email)){
@@ -83,6 +88,10 @@ if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"
     }*/
     if(!is_valid_email($email)){
         flash("Please type a valid email <br>");
+        $hasError = true;
+    }
+    if(!preg_match('/^[a-z0-9_-]{3,30}$/', $username)){
+        flash("Username must be 3-30 characters, lowercase, alphanumeric, and can contain _ or -", "warning");
         $hasError = true;
     }
 
@@ -111,10 +120,10 @@ if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"
 
         $hash = password_hash($password, PASSWORD_BCRYPT);          //always different output even if same password
         $db = getDB();
-        $stmt = $db->prepare("INSERT INTO Users (email, password) VALUES(:email, :password)");
+        $stmt = $db->prepare("INSERT INTO Users (email, password, username) VALUES(:email, :password, :username)");
         //:password & :email is placeholder;  not $varaibles because user can put in drop table as password
         try {
-            $stmt->execute([":email" => $email, ":password" => $hash]);
+            $stmt->execute([":email" => $email, ":password" => $hash, ":username" => $username]);
             flash("Successfully registered!");
         } catch (Exception $e) {
             flash("There was a problem registering");
