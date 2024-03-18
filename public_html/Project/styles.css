@@ -1,0 +1,42 @@
+    .alert-success {
+        background-color: green
+}
+
+    .alert-warning {
+        background-color: yellow;
+}
+
+    .alert-danger {
+        background-color: red;
+}
+
+    .alert-info {
+        background-color: teal;
+}
+/*-------------*/
+
+body{
+    background-color: #192428;
+    color: whitesmoke;
+}
+
+nav li {
+    display: inline;
+}
+
+nav ul {
+    background-color: rgba(0, 0, 0, 0.481);
+    font-size: larger;
+    padding: 1em
+}
+
+nav li a{
+    color:#0784b5;
+}
+
+input{
+    margin: 2px;
+    border-radius: 1em;
+    padding-left: .5em;
+}
+

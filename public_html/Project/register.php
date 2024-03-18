@@ -1,26 +1,26 @@
 <?php
 require(__DIR__ . "/../../partials/nav.php");
+reset_session();
 ?>
 <form onsubmit="return validate(this)" method="POST">
     <div>
         <label for="email">Email</label>
-        <input id="email" type="email" name="email"  required/>
+        <input id="email" type="email" name="email" required/>
     </div>
     <div>
         <label for="username">Username</label>
-        <input id="username" type="text" name="username"  required/>
+        <input id="username" type="text" name="username" required/>
     </div>
     <div>
         <label for="pw">Password</label>
-        <input type="password" id="pw" name="password" required minlength="8" required/>
+        <input type="password" id="pw" name="password" minlength="8" required/>
     </div>
     <div>
         <label for="confirm">Confirm</label>
-        <input type="password" name="confirm" required minlength="8" required/>
+        <input type="password" name="confirm" minlength="8" required/>
     </div>
     <input type="submit" value="Register" />
 </form>
-<p id="JSError"></p>
 
 <script>
     function validate(form) {
@@ -30,28 +30,26 @@ require(__DIR__ . "/../../partials/nav.php");
         let password = form.password.value;
         let confirmPassword = form.confirm.value;
 
-        let displayError = document.getElementById("JSError");
-
         let errorCounter = 0;
 
         if (email == ""){
-            displayError.insertAdjacentHTML("beforeend", "An eamil must be provided. <br>");
+            flash("An eamil must be provided.", "danger");
             errorCounter++;
         }
         if (password == ""){
-            displayError.insertAdjacentHTML("beforeend", "An password must be provided. <br>");
+            flash("An password must be provided.", "danger");
             errorCounter++;
         }
         if (confirmPassword == ""){
-            displayError.insertAdjacentHTML("beforeend", "An confirm password must be provided. <br>");
+            flash("An confirm password must be provided.", "danger");
             errorCounter++;
         }
         if (password.length < 8){
-            displayError.insertAdjacentHTML("beforeend", "Password must be at least 8 characters. <br>");
+            flash("Password too short.", "danger");
             errorCounter++;
         }
         if (password != "" && confirmPassword != password){
-            displayError.insertAdjacentHTML("beforeend", "Passwords must match. <br>");
+            flash("Passwords must match.", "danger");
             errorCounter++;
         }
         if (errorCounter === 0){
@@ -71,11 +69,10 @@ if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"
     $username = se($_POST,"username", "", false);
 
     //TODO 3: validate/use
-    $hasError = false;
-    if(empty($email)){
-        flash("Email must be provided <br>");
-        $hasError = true;
-    }
+ $hasError = false;
+    if (empty($email)) {
+        flash("An eamil must be provided.", "danger");
+        $hasError = true;}
 
     //sanatize removes all illegal characters 
     //$email = filter_var($email, FILTER_SANITIZE_EMAIL);
@@ -86,29 +83,28 @@ if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"
         echo "Please type a valid email <br>";
         $hasError = true;
     }*/
-    if(!is_valid_email($email)){
-        flash("Please type a valid email <br>");
+    if (!is_valid_email($email)) {
+        flash("Invalid email address", "danger");
         $hasError = true;
     }
-    if(!preg_match('/^[a-z0-9_-]{3,30}$/', $username)){
-        flash("Username must be 3-30 characters, lowercase, alphanumeric, and can contain _ or -", "warning");
+    if (!is_valid_username($username)) {
+        flash("Username must only contain 3-16 characters a-z, 0-9, _, or -", "danger");
         $hasError = true;
     }
-
-    if(empty($password)){
-        flash("Password must be provided <br>");
+    if (empty($password)) {
+        flash("password must be provided", "danger");
         $hasError = true;
     }
     if (empty($confirm)) {
-        flash("Confirm Password must be provided <br>");
+        flash("Confirm password must be provided", "danger");
         $hasError = true;
     }
-    if(strlen($password) < 8){
-        flash("Password must be at least 8 characters long <br>");
+    if (!is_valid_password($password)) {
+        flash("Password too short", "danger");
         $hasError = true;
     }
-    if(strlen($password) > 0 && $password !== $confirm){
-        flash("Password must be match <br>");
+    if (strlen($password) > 0 && $password !== $confirm) {
+        flash("Passwords must match", "danger");
         $hasError = true;
     }
     if(!$hasError){
@@ -124,10 +120,10 @@ if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"
         //:password & :email is placeholder;  not $varaibles because user can put in drop table as password
         try {
             $stmt->execute([":email" => $email, ":password" => $hash, ":username" => $username]);
-            flash("Successfully registered!");
-        } catch (Exception $e) {
+            flash("Successfully registered!", "success");
+        } catch (PDOException $e) {
             flash("There was a problem registering");
-            flash("<pre>" . var_export($e, true) . "</pre>");
+            users_check_duplicate($e->errorInfo);;
         }
     }
 }
