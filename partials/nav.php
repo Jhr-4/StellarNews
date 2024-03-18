@@ -1,4 +1,5 @@
 <?php
+require_once(__DIR__ . "/../lib/functions.php");
 //Note: this is to resolve cookie issues with port numbers
 $domain = $_SERVER["HTTP_HOST"];
 if (strpos($domain, ":")) {
@@ -11,7 +12,7 @@ $localWorks = false; //some people have issues with localhost for the cookie par
 if (($localWorks && $domain == "localhost") || $domain != "localhost") {
     session_set_cookie_params([
         "lifetime" => 60 * 60,
-        "path" => "/Project",
+        "path" => "$BASE_PATH",
         //"domain" => $_SERVER["HTTP_HOST"] || "localhost",
         "domain" => $domain,
         "secure" => true,
@@ -26,7 +27,8 @@ session_start();
 require_once(__DIR__ . "/../lib/functions.php");
 
 ?>
-
+<link rel="stylesheet" href="styles.css">
+<script src="helpers.js"></script>
 
 <nav>
     <ul>

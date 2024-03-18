@@ -66,8 +66,8 @@ if (isset($_POST["email"]) && isset($_POST["password"])) {
                     $hash = $user["password"];
                     unset($user["password"]);
                     if (password_verify($password, $hash)) {
-                        flash("Welcome $email");
                         $_SESSION["user"] = $user;
+                        flash("Welcome, ". get_username());
                         die(header("Location: home.php"));
                     } else {
                         flash("Invalid password");
@@ -78,8 +78,7 @@ if (isset($_POST["email"]) && isset($_POST["password"])) {
             }
         } catch (Exception $e) {
             //flash("<pre>" . var_export($e, true) . "</pre>");
-            flash("An unhandled error occured");
-            error_log(var_export($e, true));
+            flash("<pre>" . var_export($e, true) . "</pre>");
         }
     }
 }
