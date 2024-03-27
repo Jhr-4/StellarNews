@@ -4,20 +4,48 @@ require(__DIR__ . "/../../partials/nav.php");
 <form onsubmit="return validate(this)" method="POST">
     <div>
         <label for="email">Email/Usernmae</label>
-        <input type="text" name="email" required />
+        <input type="text" name="email" required/>
     </div>
     <div>
         <label for="pw">Password</label>
-        <input type="password" id="pw" name="password" required minlength="8" />
+        <input type="password" id="pw" name="password" minlength="8" required/>
     </div>
-    <input type="submit" value="Login" />
+    <input type="submit" value="Login"/>
 </form>
 <script>
     function validate(form) {
         //TODO 1: implement JavaScript validation
         //ensure it returns false for an error and true for success
+        let password = form.password.value;
+        let email_user = form.email.value;
 
-        return true;
+        let isValid = true;
+
+        //email or username
+        if (email_user === ""){ //if empty it must be provided
+                flash("[Client] Email/username must be provided.", "danger");
+                isValid = false;
+        } else if (/@/.test(email_user)){ //not empty from earlier & if has @ -> check email regex conditions
+            if ( !/^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})*$/.test(email_user)){
+                flash("[Client] Invalid Email", "danger");
+                isValid = false;
+            }
+        } else if (!/^[a-z0-9_-]{3,16}$/.test(email_user)){ //not empty from earlier & no @email -> check username regex conditions
+                flash("[Client] Invalid Username", "danger"); //user should already know format...
+                isValid = false;
+        } 
+
+        //password
+        if (password === ""){
+            flash("[Client] A password must be provided.", "danger");
+            isValid = false;
+        }
+        if (password !=="" && password.length < 8){
+            flash("[Client] Password too short.", "danger");//will potentially be changed to just "Invalid Password." User should know correct length.
+            isValid = false;
+        }
+
+        return isValid;
     }
 </script>
 <?php

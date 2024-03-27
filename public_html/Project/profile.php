@@ -15,7 +15,7 @@ if (isset($_POST["save"])) {
         $hasError = true;
     }
     if (!is_valid_username($username)) {
-        flash("Username must only contain 3-16 characters a-z, 0-9, _, or -", "danger");
+        flash("Username must only contain 3-16 alphanumeric characters, underscores, or dashes.", "danger");
         $hasError = true;
     }
     if (!$hasError) {
@@ -96,42 +96,93 @@ $username = get_username();
 <form method="POST" onsubmit="return validate(this);">
     <div class="mb-3">
         <label for="email">Email</label>
-        <input type="email" name="email" id="email" value="<?php se($email); ?>" />
+        <input type="email" name="email" id="email" value="<?php se($email); ?>" required/>
     </div>
     <div class="mb-3">
         <label for="username">Username</label>
-        <input type="text" name="username" id="username" value="<?php se($username); ?>" />
+        <input type="text" name="username" id="username" value="<?php se($username); ?>" required/> 
     </div>
     <!-- DO NOT PRELOAD PASSWORD -->
     <div>Password Reset</div>
     <div class="mb-3">
         <label for="cp">Current Password</label>
-        <input type="password" name="currentPassword" id="cp" />
+        <input type="password" name="currentPassword" minlength="8" id="cp" />
     </div>
     <div class="mb-3">
         <label for="np">New Password</label>
-        <input type="password" name="newPassword" id="np" />
+        <input type="password" name="newPassword" minlength="8" id="np" />
     </div>
     <div class="mb-3">
         <label for="conp">Confirm Password</label>
-        <input type="password" name="confirmPassword" id="conp" />
+        <input type="password" name="confirmPassword" minlength="8" id="conp" />
     </div>
     <input type="submit" value="Update Profile" name="save" />
 </form>
 
 <script>
     function validate(form) {
-        let pw = form.newPassword.value;
-        let con = form.confirmPassword.value;
+        let email = form.email.value;
+        let username = form.username.value;
+        let newPassword = form.newPassword.value;
+        let confirmPassword = form.confirmPassword.value;
+        let currentPassword = form.currentPassword.value;
+
         let isValid = true;
         //TODO add other client side validation....
 
         //example of using flash via javascript
         //find the flash container, create a new element, appendChild
-        if (pw !== con) {
-            flash("Password and Confrim password must match", "warning");
+       
+        //email
+        if (email === ""){
+            flash("[Client] An eamil must be provided.", "danger");
             isValid = false;
         }
+        if (email !== "" && !/^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})*$/.test(email)){
+            flash("[Client] Invalid email address.", "danger");
+            isValid = false;
+        }
+
+        //username
+        if (username === ""){
+            flash("[Client] An username must be provided.", "danger");
+            isValid = false;
+        }
+        if (username !== "" && !/^[a-z0-9_-]{3,16}$/.test(username)){
+            flash("[Client] Username must only contain 3-16 alphanumeric characters, underscores, or dashes.", "danger");
+            isValid = false;
+        }
+
+        //password
+        if (newPassword !== "" || confirmPassword !=="" || currentPassword !==""){ //if any password has text, user trying to change pass
+            if (currentPassword === ""){
+                flash("[Client] Current password must be provided.", "danger");
+                isValid = false;
+            }
+            if (currentPassword.length < 8){
+                flash("[Client] Password too short.", "danger"); ////will potentially be changed to just "Invalid Password." User should know correct length.
+                isValid = false;
+            }
+            if (newPassword === ""){
+                flash("[Client] A new password must be provided.", "danger");
+                isValid = false;
+            }
+            if (confirmPassword === ""){
+                flash("[Client] A confirm password must be provided.", "danger");
+                isValid = false;
+            }
+            if ((newPassword !== "" && confirmPassword !== "") && newPassword !== confirmPassword) { 
+                //only occurs if both password filled; if one feild is empty the message to fill them is already displayed so this is unnecessary
+                flash("[Client] Password and Confrim password must match", "danger");
+                isValid = false;
+            }
+            if ((newPassword !== "" || confirmPassword !="") && (newPassword.length < 8 || confirmPassword.length < 8)){
+                //tells the user if the password is to short if they attempt to change using any feild
+                flash("[Client] Password too short.", "danger");
+                isValid = false;
+            }
+        }
+
         return isValid;
     }
 </script>
