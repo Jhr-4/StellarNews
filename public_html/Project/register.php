@@ -27,31 +27,50 @@ reset_session();
         //TODO 1: implement JavaScript validation
         //ensure it returns false for an error and true for success
         let email = form.email.value;
+        let username = form.username.value;
         let password = form.password.value;
         let confirmPassword = form.confirm.value;
 
         let errorCounter = 0;
 
-        if (email == ""){
-            flash("An eamil must be provided.", "danger");
+        //email
+        if (email === ""){
+            flash("[Client] An eamil must be provided.", "danger");
             errorCounter++;
         }
-        if (password == ""){
-            flash("An password must be provided.", "danger");
+        if (email !== "" && !/^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})*$/.test(email)){
+            flash("[Client] Invalid email address.", "danger");
+            errorCounter++
+        }
+        //username
+        if (username === ""){
+            flash("[Client] An username must be provided.", "danger")
+            errorCounter++
+        }
+        if (username !== "" && !/^[a-z0-9_-]{3,16}$/.test(username)){
+            flash("[Client] Username must only contain 3-16 alphanumeric characters, underscores, or dashes.", "danger");
             errorCounter++;
         }
-        if (confirmPassword == ""){
-            flash("An confirm password must be provided.", "danger");
+        //password
+        if (password === ""){
+            flash("[Client] A password must be provided.", "danger");
             errorCounter++;
         }
-        if (password.length < 8){
-            flash("Password too short.", "danger");
+        if (confirmPassword === ""){
+            flash("[Client] A confirm password must be provided.", "danger");
             errorCounter++;
         }
-        if (password != "" && confirmPassword != password){
-            flash("Passwords must match.", "danger");
+        if ((password !== "" && confirmPassword !== "") && (password.length < 8 || confirmPassword.length<8)){
+        //tells the user if the password is to short if they attempt to change using any feild
+            flash("[Client] Password too short.", "danger");
             errorCounter++;
         }
+        if ((password !== "" && confirmPassword !== "") && confirmPassword != password){
+        //only occurs if both password filled; if one feild is empty the message to fill them is already displayed so this is unnecessary
+            flash("[Client] Passwords must match.", "danger");
+            errorCounter++;
+        }
+        
         if (errorCounter === 0){
             return true;
         }else {
@@ -84,27 +103,27 @@ if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"
         $hasError = true;
     }*/
     if (!is_valid_email($email)) {
-        flash("Invalid email address", "danger");
+        flash("Invalid email address.", "danger");
         $hasError = true;
     }
     if (!is_valid_username($username)) {
-        flash("Username must only contain 3-16 characters a-z, 0-9, _, or -", "danger");
+        flash("Username must only contain 3-16 alphanumeric characters, underscores, or dashes.", "danger");
         $hasError = true;
     }
     if (empty($password)) {
-        flash("password must be provided", "danger");
+        flash("A password must be provided.", "danger");
         $hasError = true;
     }
     if (empty($confirm)) {
-        flash("Confirm password must be provided", "danger");
+        flash("A confirm password must be provided.", "danger");
         $hasError = true;
     }
     if (!is_valid_password($password)) {
-        flash("Password too short", "danger");
+        flash("Password too short.", "danger");
         $hasError = true;
     }
     if (strlen($password) > 0 && $password !== $confirm) {
-        flash("Passwords must match", "danger");
+        flash("Passwords must match.", "danger");
         $hasError = true;
     }
     if(!$hasError){
