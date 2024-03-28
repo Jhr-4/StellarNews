@@ -160,7 +160,7 @@ $username = get_username();
                 isValid = false;
             }
             if (currentPassword.length < 8){
-                flash("[Client] Password too short.", "danger"); ////will potentially be changed to just "Invalid Password." User should know correct length.
+                flash("[Client] Current password is invalid.", "danger"); //current password should be atleast 8.
                 isValid = false;
             }
             if (newPassword === ""){
@@ -178,7 +178,7 @@ $username = get_username();
             }
             if ((newPassword !== "" || confirmPassword !="") && (newPassword.length < 8 || confirmPassword.length < 8)){
                 //tells the user if the password is to short if they attempt to change using any feild
-                flash("[Client] Password too short.", "danger");
+                flash("[Client] New password too short.", "danger");
                 isValid = false;
             }
         }
