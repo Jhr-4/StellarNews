@@ -1,0 +1,85 @@
+.alert-success {
+    background-color: green;
+    color: black;
+}
+
+.alert-warning {
+    background-color: yellow;
+    color: black;
+}
+
+.alert-danger {
+    background-color: red;
+    color: black;
+}
+
+.alert-info {
+    background-color: teal;
+    color: black;
+}
+
+/*-------------*/
+
+body{
+    background-color: #192428;
+    color: whitesmoke;
+}
+
+nav {
+    && li {
+        display: inline;
+    }
+
+    && ul {
+        background-color: rgba(0, 0, 0, 0.481);
+        font-size: larger;
+        padding: 1em;
+    }
+
+    && li a{
+        color:#0784b5;
+        margin: 1rem;
+    }
+}
+
+
+form {    
+    && input {
+        max-width: fit-content;
+        margin: 2px;
+        border-radius: 1em;
+        padding-left: .5em;
+    }
+
+    && textarea {
+        margin: 2px;
+        border-radius: 1em;
+        padding-left: .5em;
+    }
+}
+
+table {
+    min-width: 100%;
+    margin-bottom: 1em;
+    border-collapse: collapse;
+    text-align: center;
+    
+    && th {
+        background-color: rgba(0, 0, 107, 0.43);
+        border: 2px solid rgb(0, 0, 0);
+        padding: 1em;
+    }
+
+    && td {
+        background-color: rgba(3, 3, 75, 0.219);
+        border: 2px solid rgb(0, 0, 0);
+        padding: 1em;
+    }
+
+    && table td {
+        border: 0;
+        border-bottom: 2px solid rgb(0, 0, 0);
+        border-top: 2px solid rgb(0, 0, 0);
+    }
+}
+
