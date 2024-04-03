@@ -1,22 +1,4 @@
-.alert-success {
-    background-color: green;
-    color: black;
-}
 
-.alert-warning {
-    background-color: yellow;
-    color: black;
-}
-
-.alert-danger {
-    background-color: red;
-    color: black;
-}
-
-.alert-info {
-    background-color: teal;
-    color: black;
-}
 
 /*-------------*/
 
@@ -45,16 +27,13 @@ nav {
 
 form {    
     && input {
-        max-width: fit-content;
-        margin: 2px;
         border-radius: 1em;
-        padding-left: .5em;
+        max-width: fit-content;
     }
 
     && textarea {
         margin: 2px;
         border-radius: 1em;
-        padding-left: .5em;
     }
 }
 
@@ -63,23 +42,26 @@ table {
     margin-bottom: 1em;
     border-collapse: collapse;
     text-align: center;
-    
+
     && th {
-        background-color: rgba(0, 0, 107, 0.43);
-        border: 2px solid rgb(0, 0, 0);
-        padding: 1em;
+        background-color: rgba(0, 0, 107, 0.43) !important;
+        border: 2px solid rgb(0, 0, 0) !important;
+        padding: 1em !important;
+        color:white !important;
     }
 
     && td {
-        background-color: rgba(3, 3, 75, 0.219);
-        border: 2px solid rgb(0, 0, 0);
-        padding: 1em;
+        background-color: rgba(3, 3, 75, 0.219) !important;
+        border: 2px solid rgb(0, 0, 0) !important;
+        padding: 1em !important;
+        color: white !important;
     }
 
     && table td {
         border: 0;
-        border-bottom: 2px solid rgb(0, 0, 0);
-        border-top: 2px solid rgb(0, 0, 0);
+        border-bottom: 2px solid rgb(0, 0, 0) !important;
+        border-top: 2px solid rgb(0, 0, 0) !important;
     }
+
 }
 

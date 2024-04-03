@@ -1,7 +1,9 @@
 <?php
 require(__DIR__."/../../partials/nav.php");
 ?>
-<h1>Home</h1>
+<div class="container-fluid">
+  <h1>Home</h1>
+</div>
 <?php
 /*if(isset($_SESSION["user"]) && isset($_SESSION["user"]["email"])){
  echo "Welcome, " . $_SESSION["user"]["email"]; 
