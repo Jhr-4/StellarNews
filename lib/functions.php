@@ -25,5 +25,6 @@ require(__DIR__ . "/reset_session.php");
 require(__DIR__ . "/get_url.php");
 //Bootstraps 
 require_once(__DIR__ . "/render_functions.php");
-
+//API
+require_once(__DIR__ . "/api_helper.php");
 ?>
