@@ -61,3 +61,29 @@ table {
 
 }
 
+.tableDiv{
+    overflow-x: hidden;
+    height: 85dvh !important;
+    width: 100%;
+    overflow-y: auto !important;
+}
+
+
+
+.listTable {
+    table-layout: fixed;
+}
+  
+.listTable td{ 
+    height: 5em;
+    overflow-x: auto;
+}
+
+textarea:disabled, input:disabled, textarea:disabled::placeholder, input:disabled::placeholder{
+    background-color: gray !important;
+    color: black !important;
+}
+
+textarea:disabled:hover, input:disabled:hover{
+    cursor: not-allowed;
+}
