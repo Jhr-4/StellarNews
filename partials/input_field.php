@@ -4,6 +4,7 @@
     $_include_margin = (bool)se($data, "include_margin", true, false);
     $_label = se($data, "label", "", false);
     $_id = se($data, "id", uniqid(), false);
+    $_class = se($data, "class", "", false);
     $_type = se($data, "type", "text", false);
     $_placeholder = se($data, "placeholder", "", false);
     $_value = se($data, "value", "", false);
@@ -32,10 +33,10 @@
 
         <?php if (!in_array($_type, $_non_stanard_types)) : ?>
             <?php /* input field */ ?>
-            <input type="<?php se($_type); ?>" name="<?php se($_name); ?>" class="form-control" id="<?php se($_id); ?>" value="<?php se($_value); ?>" placeholder="<?php se($_placeholder); ?>" 
+            <input type="<?php se($_type); ?>" name="<?php se($_name); ?>" class="form-control <?php se($_class); ?>" id="<?php se($_id); ?>" value="<?php se($_value); ?>" placeholder="<?php se($_placeholder); ?>" 
             <?php echo $_rules;?> />
         <?php elseif($_type === "textarea"):?>
-            <textarea class="form-control" name="<?php se($_name); ?>" id="<?php se($_id); ?>" placeholder="<?php se($_placeholder); ?>" <?php echo $_rules;?>><?php se($_value);?></textarea>
+            <textarea class="form-control <?php se($_class); ?>" name="<?php se($_name); ?>" id="<?php se($_id); ?>" placeholder="<?php se($_placeholder); ?>" <?php echo $_rules;?>><?php se($_value);?></textarea>
         <?php elseif ($_type === "TBD type") : ?>
             <?php /* TODO other non-form-control elements */ ?>
         <?php endif; ?>
@@ -53,5 +54,6 @@
     unset($_placeholder);
     unset($_value);
     unset($_name);
+    unset($_class)
     ?>
 <?php endif; ?>

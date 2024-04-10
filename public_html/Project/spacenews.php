@@ -1,5 +1,9 @@
 <?php
 require(__DIR__ . "/../../partials/nav.php");
+if (!has_role("Admin")) {
+    flash("You don't have permission to view this page", "warning");
+    die(header("Location: " . get_url("home.php")));
+}
 
 if(isset($_GET["articleDays"])){
 $result = get('https://spacenews.p.rapidapi.com/datenews/1', "SPACE_API_KEY", $data = ["days" => $_GET["articleDays"]], true, 'spacenews.p.rapidapi.com');
