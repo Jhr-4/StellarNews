@@ -4,19 +4,19 @@ body{
 }
 
 nav {
-    && li {
-        display: inline;
+    background-color: rgba(0, 0, 0, 0.481) !important;
+    margin-bottom: 1rem;  
+    && a{
+        color:#0784b5 !important;
     }
-
-    && ul {
-        background-color: rgba(0, 0, 0, 0.481);
-        font-size: larger;
-        padding: 1em;
+    && a:hover{
+        color:inherit !important;
     }
-
-    && li a{
-        color:#0784b5;
-        margin: 1rem;
+    && .h1 {
+        color: whitesmoke !important;
+        background-color: #03364863;
+        padding: .5em;
+        border-radius: 1em;
     }
 }
 
@@ -68,16 +68,27 @@ table {
     overflow-y: auto !important;
 }
 
-
-
 .listTable {
     table-layout: fixed;
+    overflow: auto;
+    && td, th{
+        word-break: break-word !important;
+        overflow-y: auto;
+    }
+
+    && .api_id {
+        width: 5em !important;
+    }
+    && .is_active{
+        width: 7em !important;
+    }
+    && .title {
+        width: 10em;
+    }
 }
-  
-.listTable td{ 
-    height: 5em;
-    overflow-x: auto;
-}
+
+
+
 
 textarea:disabled, input:disabled, textarea:disabled::placeholder, input:disabled::placeholder{
     background-color: gray !important;

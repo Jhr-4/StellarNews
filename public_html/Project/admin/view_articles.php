@@ -39,31 +39,58 @@ if($article){
         $isAPI = false;
         $article['api_timestamp'] = $article['created'];
     }
-    $form = [
-        ["type"=>"number", "id"=>"api_id", "name"=>"api_id", "label"=>"API ID", "placeholder"=>"Not API Made", "rules"=>["disabled"=>true]],//never changed
-        ["type"=>"textarea", "id"=>"title", "name"=>"title", "label"=>"Article Title", "placeholder"=>"Title", "rules"=>["disabled"=>true]],
-        ["type"=>"textarea", "id"=>"site_url", "name"=>"site_url", "label"=>"Article Link", "placeholder"=>"Not API Made", "rules"=>["disabled"=>true]],//can be changed if api
-        ["type"=>"textarea", "id"=>"image_url", "name"=>"image_url", "label"=>"Article Image", "placeholder"=>"https://image.com", "rules"=>["disabled"=>true]],
-        ["type"=>"textarea", "id"=>"news_text", "name"=>"news_text", "label"=>"Main Article", "placeholder"=>"Description", "rules"=>["disabled"=>true]],
-        ["type"=>"textarea", "id"=>"news_summary_long", "name"=>"news_summary_long", "label"=>"Article Summary", "placeholder"=>"Description Summary", "rules"=>["disabled"=>true]],
-        ["type"=>"input", "id"=>"api_timestamp", "name"=>"api_timestamp", "label"=>"Original Article Upload", "rules"=>["disabled"=>true]],
-    ];
-    $keys = array_keys($article);
-    foreach($form as $k => $v){
-        if(in_array($v["name"], $keys)){
-            $form[$k]["value"] = $article[$v["name"]];
-        }
-    }
 }
-
 ?>
 
 <div class="container-fluid"> 
-    <h3>View Articles</h3>
-    <form>
-        <?php foreach($form as $k => $v){render_input($v);}?>
-    </form>
-    <a class="btn btn-primary" href="<?php echo get_url('admin/list_articles.php'); ?>">Return</a>
+    <h3>Viewing Article</h3>
+
+    <div class="card mx-auto w-75 mb-3 shadow p-3 mb-5 bg-body rounded">
+        <div class="card-body">
+            <!--TITLE-->
+            <h3 class="card-title"><?php se($article, "title", "Unknown"); ?></h3>
+
+            <!--DISPLAY LINK/SITE-->
+            <h6 class="card-subtitle mb-2 text-muted">From: 
+                <a href="<?php se($article, "site_url", "?id=$id"); ?>" target="_blank">
+                    <?php
+                    //    /(https?:\/\/)?(www\.)?        [-a-zA-Z0-9@:%._\+~#=]{2,256}     \.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ 
+                    //remove https://www.  &&    .top-domain/----
+                    if ($article['site_url']){
+                        if (preg_match('/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/', $article['site_url']) ) {
+                            $article['site_url'] = preg_replace('/(https?:\/\/)?(www\.)?/', '', $article['site_url']);
+                            $article['site_url'] = preg_replace('/\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/', '', $article['site_url']);
+                        }
+                    }
+                    ?>
+                <?php se($article, "site_url", "Unknown"); ?>
+                </a>
+            </h6>
+
+            <!--BUTTONS-->
+            <div class="mb-1">
+            <a class="btn btn-primary" href="<?php echo get_url('admin/list_articles.php'); ?>">Return</a>
+            <?php if (has_role("Admin")) :?>
+                <a class="btn btn-secondary" href="<?php echo get_url("admin/edit_articles.php?id=$id"); ?>">Edit</a>
+                <a class="btn btn-danger" href="<?php echo get_url("admin/delete_articles.php?id=$id"); ?>">Toggle</a>
+            <?php endif; ?>
+            </div>
+
+            <!--IMAGE-->
+            <div class="text-center bg-secondary bg-opacity-50">
+            <img src="<?php se($article, "image_url", "Unknown"); ?>" class="img-fluid rounded" alt="Image of Article">
+            </div>
+
+            <!--BODY-->
+            <p class="card-text">
+                    <small class="text-muted">Uploaded on <?php se($article, "created", "Unknown"); ?></small>
+            </p>
+            <div class="card-text">
+            <p class="card-text"><h4>TLDR;</h4> <?php se($article, "news_summary_long", "Unknown"); ?></p>
+            <p class="card-text"><h4>Main: </h4><pre style="white-space: pre-wrap; font: inherit;"><?php se($article, "news_text", "Unknown"); ?></pre>
+            </div>
+        </div>
+    </div>
 </div>
 
 

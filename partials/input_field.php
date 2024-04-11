@@ -19,6 +19,11 @@
         }
         return $key . '="' . $value . '"';
     }, array_keys($_rules), $_rules);
+    //FOR SELECT INPUTS
+    $_options = isset($data["options"]) ? $data["options"] : [];
+    if (!is_array($_options)) {
+        $_options = [];}
+
     //convert array to a space separate string
     $_rules = implode(" ", $_rules);
     ?>
@@ -35,10 +40,18 @@
             <?php /* input field */ ?>
             <input type="<?php se($_type); ?>" name="<?php se($_name); ?>" class="form-control <?php se($_class); ?>" id="<?php se($_id); ?>" value="<?php se($_value); ?>" placeholder="<?php se($_placeholder); ?>" 
             <?php echo $_rules;?> />
+        <!--TEXTAREA-->
         <?php elseif($_type === "textarea"):?>
             <textarea class="form-control <?php se($_class); ?>" name="<?php se($_name); ?>" id="<?php se($_id); ?>" placeholder="<?php se($_placeholder); ?>" <?php echo $_rules;?>><?php se($_value);?></textarea>
-        <?php elseif ($_type === "TBD type") : ?>
-            <?php /* TODO other non-form-control elements */ ?>
+        <!--SELECT-->
+            <?php elseif ($_type === "select") : ?>
+                <select class="form-select" name="<?php se($_name); ?>" value="<?php se($_value); ?>" id="<?php se($_id); ?>">
+                <?php foreach ($_options as $k => $v) : ?>
+                    <option <?php echo (isset($_value) && $_value === $k ? "selected" : ""); ?> value="<?php se($k); ?>"><?php se($v); ?>
+                
+                    </option>
+                <?php endforeach; ?>
+                </select>
         <?php endif; ?>
         <?php /* Include margin close tag */ ?>
         <?php if ($_include_margin) : ?>

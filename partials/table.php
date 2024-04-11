@@ -49,7 +49,7 @@
         <?php if ($_header_override) : ?>
             <thead>
                 <?php foreach ($_header_override as $h) : ?>
-                    <th><?php se($h); ?></th>
+                    <th class=<?php se($h)?>><?php se($h); ?></th>
                 <?php endforeach; ?>
                 <?php if ($_has_atleast_one_url) : ?>
                     <th>Actions</th>
@@ -62,7 +62,7 @@
                     <tr>
                         <?php foreach ($row as $k =>  $v) : ?>
                             <?php if (!in_array($k, $_ignored_columns)) : ?>
-                                <td><?php se($v); ?></td>
+                                <td class=<?php se($k); ?>><?php se($v); ?></td>
                             <?php endif; ?>
                         <?php endforeach; ?>
                         <?php if ($_has_atleast_one_url) : ?>

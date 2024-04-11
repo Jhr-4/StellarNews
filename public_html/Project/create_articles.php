@@ -59,10 +59,10 @@ if(isset($_POST["createForm"])){
     <h3>Create Articles</h3>
     <form method="POST">
         <div>
-            <?php render_input(["type"=>"text", "id"=>"title", "name"=>"title", "label"=>"Article Title", "placeholder"=>"Title", "rules"=>["required"=>true]]);?>
-            <?php render_input(["type"=>"text", "id"=>"image_url", "name"=>"image_url", "label"=>"Article Image", "placeholder"=>"https://image.com", "rules"=>["required"=>true]]);?>
-            <?php render_input(["type"=>"text", "id"=>"news_text", "name"=>"news_text", "label"=>"Main Article", "placeholder"=>"Description", "rules"=>["required"=>true]]);?>
-            <?php render_input(["type"=>"text", "id"=>"news_summary_long", "name"=>"news_summary_long", "label"=>"Article Summary", "placeholder"=>"Description Summary", "rules"=>["required"=>true]]);?>
+            <?php render_input(["type"=>"textarea", "id"=>"title", "name"=>"title", "label"=>"Article Title", "placeholder"=>"Title", "rules"=>["required"=>true]]);?>
+            <?php render_input(["type"=>"textarea", "id"=>"image_url", "name"=>"image_url", "label"=>"Article Image", "placeholder"=>"https://image.com", "rules"=>["required"=>true]]);?>
+            <?php render_input(["type"=>"textarea", "id"=>"news_text", "name"=>"news_text", "label"=>"Main Article", "placeholder"=>"Description", "rules"=>["required"=>true]]);?>
+            <?php render_input(["type"=>"textarea", "id"=>"news_summary_long", "name"=>"news_summary_long", "label"=>"Article Summary", "placeholder"=>"Description Summary", "rules"=>["required"=>true]]);?>
             <?php render_input(["type"=>"hidden", "name"=>"createForm", "value"=>"createForm"]) ?>
             <?php render_button(["text"=>"Fetch Articles", "type"=>"submit"]);?>
         </div>
