@@ -63,28 +63,33 @@ table {
 
 .tableDiv{
     overflow-x: hidden;
-    height: 85dvh !important;
+    height: 85dvh;
     width: 100%;
-    overflow-y: auto !important;
+    overflow-y: auto;
+    overflow-x: auto;
 }
 
 .listTable {
-    table-layout: fixed;
+    table-layout: auto;
     overflow: auto;
     && td, th{
-        word-break: break-word !important;
-        overflow-y: auto;
+        white-space: normal !important;
+        max-height: 10em !important;
     }
-
-    && .api_id {
-        width: 5em !important;
+    && .api_id{
+        width: 6em !important;
     }
     && .is_active{
-        width: 7em !important;
+        width: 10em !important;
     }
-    && .title {
-        width: 10em;
+    && .title, .image_url, #actionsCol{
+        width: 15em;
     }
+    #actionsCol a{
+        margin-top: .5em;
+        margin-bottom: .5em;        
+    }
+
 }
 
 

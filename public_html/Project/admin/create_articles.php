@@ -6,12 +6,10 @@ if (!has_role("Admin")) {
     flash("You don't have permission to view this page", "warning");
     die(header("Location: " . get_url("home.php")));
 }
-?>
 
-<?php
-$id = se($_GET, "id", -1, false);
-//unsets values that shouldn't be changed
-if(isset($_POST["title"])){
+if(isset($_POST["createForm"])){    
+
+    //REMOVING EXTRAs just incase...
     foreach($_POST as $k => $v){
         if(!in_array($k, ["title", "site_url", "image_url", "news_text", "news_summary_long"])){
             unset($_POST[$k]);
@@ -26,12 +24,8 @@ if(isset($_POST["title"])){
     $newsSUMMARY = se($_POST, "news_summary_long", null, false);
     $hasError = false;
 
-    if (empty($title) || empty($imageURL) || empty($newsTEXT) || empty($newsSUMMARY)) {//checks for all inputs. siteURL is optional
+    if (empty($title) || empty($imageURL) || empty($newsTEXT) || empty($newsSUMMARY)) {//checks for all inputs.
         flash("ALL Fields Required.", "danger");
-        $hasError = true;
-    }
-    if (strlen($title)>=100 || strlen($title)<=10) {
-        flash("Title Must 10-100 Characters.", "danger");
         $hasError = true;
     }
     if (!empty($siteURL) && !preg_match('/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/', $siteURL)) {
@@ -40,6 +34,10 @@ if(isset($_POST["title"])){
     }
     if (strlen($siteURL)>=2048) {
         flash("Source Link Must Be Shorter Than 2048 Characters.", "danger");
+        $hasError = true;
+    }
+    if (strlen($title)>=100 || strlen($title)<=10) {
+        flash("Title Must 10-100 Characters.", "danger");
         $hasError = true;
     }
     if (!preg_match('/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/', $imageURL)) {
@@ -63,92 +61,46 @@ if(isset($_POST["title"])){
     if (!$hasError) {
         //getting data ready to insert into DB
         $db = getDB();
-        $query = "UPDATE `ArticlesTable` SET ";
+        $query = "INSERT INTO `ArticlesTable` ";
+        $colomns = [];
         $params = [];
         foreach($article as $k => $v){
-            if($params){
-                $query .= ",";
+            if(!in_array("`$k`", $colomns)){
+                array_push($colomns, "`$k`");
             }
-            $query .= "$k=:$k";
-            $params[":$k"] = $v;
+                $params[":$k"] = $v;
         }
-        $query .= " WHERE id = :id";
-        $params[":id"] = $id;
+        $query .= "(" . join(",", $colomns) . ")";
+        $query .= "VALUES (" . join(",", array_keys($params)) . ")";
 
+        //actual insert into DB will result in error becauseeeeeee sql table has not null on EVERYTHING!!!
         try {
             $stmt = $db->prepare($query);
             $stmt->execute($params);
-            flash("Updated data", "success");
+            flash("Sucessfully inserted data", "success");
         } catch (PDOException $error) {
-            error_log("Error Updating: " . var_export($error, true));
+            error_log("Something went wrong with the query" . var_export($error, true));
             flash("An Error Occured", "danger");
         }
 
         error_log("QUERY: " . $query);
         error_log("Params: " . var_export($params, true));
-    }
+        }
 }
 ?>
 
-<?php
-//getting the data
-$article = [];
-if ($id>-1){
-    $db = getDB();
-    $query = "SELECT api_id, api_timestamp, title, site_url, image_url, news_text, news_summary_long, created FROM  `ArticlesTable` WHERE id=:id";
-    try{
-        $stmt = $db->prepare($query);
-        $stmt->execute([":id"=>$id]);
-        $r = $stmt->fetch();
-        if($r){
-            $article= $r;
-        }
-    }catch(PDOException $error) {
-        error_log("Error fetching record: " . var_export($error, true));
-        flash ("Error fetching record", "danger");
-    }
-} else {
-    flash("invalid id passed", "danger");
-    die(header("Location:" . get_url("admin/list_articles.php ")));
-}
-
-if($article){
-    $isAPI = true;
-    if($article['api_timestamp'] === null){
-        $isAPI = false;
-        $article['api_timestamp'] = $article['created'];
-    }
-
-    $form = [
-        ["type"=>"number", "id"=>"api_id", "name"=>"api_id", "label"=>"API ID", "placeholder"=>"Not API Made", "rules"=>["required"=>true, "disabled"=>true]],//never changed
-        ["type"=>"textarea", "id"=>"title", "name"=>"title", "label"=>"Article Title", "placeholder"=>"Title", "rules"=>["required"=>true, "maxlength"=>"100", "minlength"=>"10"]],
-        ["type"=>"textarea", "id"=>"site_url", "name"=>"site_url", "label"=>"Article Link", "placeholder"=>"[NOT REQUIRED] Article Link/Source", "rules"=>["maxlength"=>"2048"]],//not required
-        ["type"=>"textarea", "id"=>"image_url", "name"=>"image_url", "label"=>"Article Image", "placeholder"=>"https://image.com", "rules"=>["required"=>true, "maxlength"=>"2048"]],
-        ["type"=>"textarea", "id"=>"news_text", "name"=>"news_text", "label"=>"Main Article", "placeholder"=>"Description", "rules"=>["required"=>true, "minlength"=>"500"]],
-        ["type"=>"textarea", "id"=>"news_summary_long", "name"=>"news_summary_long", "label"=>"Article Summary", "placeholder"=>"Description Summary", "rules"=>["required"=>true, "minlength"=>"10", "maxlength"=>"500"]],
-        ["type"=>"input", "id"=>"api_timestamp", "name"=>"api_timestamp", "label"=>"Original Article Upload", "rules"=>["required"=>true, "disabled"=>true]]//never changed
-        //type datetime-local causing problem with css so its type input . either way it shouldn't be edited so doesn't matter
-    ];
-    $keys = array_keys($article);
-    foreach($form as $k => $v){
-        if(in_array($v["name"], $keys)){
-            $form[$k]["value"] = $article[$v["name"]];
-        }
-    }
-}
-
-?>
-
+<!--create manual articles-->
 <div class="container-fluid"> 
-    <h3>Edit Articles</h3>
+    <h3>Create Articles</h3>
     <form onsubmit="return validate(this)" method="POST">
-        <?php foreach($form as $k => $v){
-            render_input($v);
-            }
-        ?>
         <div>
-            <?php render_button(["text"=>"Update Articles", "type"=>"submit", "color"=>"success"]);?>
-            <a class="btn btn-primary" href="<?php echo get_url('admin/list_articles.php'); ?>">Return</a>
+            <?php render_input(["type"=>"textarea", "id"=>"title", "name"=>"title", "label"=>"Article Title", "placeholder"=>"Title", "rules"=>["required"=>true, "maxlength"=>"100", "minlength"=>"10"]]);?>
+            <?php render_input(["type"=>"textarea", "id"=>"site_url", "name"=>"site_url", "label"=>"Article Source", "placeholder"=>"[NOT REQUIRED] https://website.com", "rules"=>["maxlength"=>"2048"]]);//NOT REQUIRED?>
+            <?php render_input(["type"=>"textarea", "id"=>"image_url", "name"=>"image_url", "label"=>"Article Image", "placeholder"=>"https://image.com", "rules"=>["required"=>true, "maxlength"=>"2048"]]);?>
+            <?php render_input(["type"=>"textarea", "id"=>"news_text", "name"=>"news_text", "label"=>"Main Article", "placeholder"=>"Description", "rules"=>["required"=>true, "minlength"=>"500"]]);?>
+            <?php render_input(["type"=>"textarea", "id"=>"news_summary_long", "name"=>"news_summary_long", "label"=>"Article Summary", "placeholder"=>"Description Summary", "rules"=>["required"=>true, "minlength"=>"10", "maxlength"=>"500"]]);?>
+            <?php render_input(["type"=>"hidden", "name"=>"createForm", "value"=>"createForm"]) ?>
+            <?php render_button(["text"=>"Create Article", "type"=>"submit"]);?>
         </div>
     </form>
 </div>
@@ -156,7 +108,6 @@ if($article){
 <script>
 function validate(form) {
     let title = form.title.value;
-    let siteURL = form.site_url.value;
     let imageURL = form.image_url.value;
     let newsTEXT = form.news_text.value;
     let newsSUMMARY = form.news_summary_long.value;
@@ -188,10 +139,10 @@ function validate(form) {
         isValid = false;
     }
     if (imageURL.length >= 2048){
-        flash("[Client] Image Link Must Be Shorter Than 2048 Characters.", "danger");
+        flash("[Client] Image Must Be Shorter Than 2048 Characters.", "danger");
         isValid = false;
     }
-    //newsText
+        //newsText
     if(newsTEXT.length<=500){
         flash("[Client] News Body Must Be 500 Characters or Greater.", "danger");
         isValid = false;
