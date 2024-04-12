@@ -18,7 +18,7 @@ $form = [
     ["type"=>"datetime-local", "id"=>"MIN_timestamp", "name"=>"MIN_timestamp", "label"=>"Article Upload After", "include_margin" => false],
 
     ["type" => "select", "name" => "sort", "label" => "Sort", "options" => ["created" => "Date", "api_id" => "API ID"], "include_margin" => false],
-    ["type" => "select", "name" => "order", "label" => "Order", "options" => ["desc" => "Newest", "asc" => "Oldest"], "include_margin" => false],
+    ["type" => "select", "class"=>"test","name" => "order", "label" => "Order", "options" => ["desc" => "Newest", "asc" => "Oldest"], "include_margin" => false],
 
     ["type" => "number", "name" => "limit", "label" => "Limit", "value" => "10", "placeholder"=>"10", "include_margin" => false],
 ];
@@ -152,23 +152,26 @@ for($i=0; $i<count($results); $i++){ //adds data for null values (that were adde
 $table = ["data" => $results, "extra_classes" => "listTable", "ignored_columns" => ["id", "news_text", "site_url"], 
             "edit_url"=>get_url("admin/edit_articles.php"),
             "delete_url"=>get_url("admin/delete_articles.php"), "delete_label"=>"Toggle",
-            "view_url"=>get_url("admin/view_articles.php")];
+            "view_url"=>get_url("view_articles.php"),
+            "header_override"=>["API ID", "Title", "Image", "Summary", "Active Status"]
+        ];
 ?>
-
 
 <div class="container-fluid">
     <h3>List Articles</h3>
-    <form method="GET" class="mb-3">
-        <div class="row mb-3" style="align-items: baseline;">
-        <?php foreach($form as $k => $v) :?>
-            <div class="col">
-                <?php render_input($v); ?>
+    <div class="card card-body border-0 bg-primary bg-opacity-10 mb-3">
+        <form method="GET">
+            <div class="row mb-3" style="align-items: baseline;">
+            <?php foreach($form as $k => $v) :?>
+                <div class="col">
+                    <?php render_input($v); ?>
+                </div>
+            <?php endforeach; ?>
             </div>
-        <?php endforeach; ?>
-        </div>
-        <?php render_button(["text"=>"Filter", "type"=>"submit"]);?>
-        <a href="?clear" class="btn btn-secondary">Reset</a>
-    </form>
+            <?php render_button(["text"=>"Filter", "type"=>"submit"]);?>
+            <a href="?clear" class="btn btn-secondary">Reset</a>
+        </form>
+    </div>
     <div class="tableDiv">
     <?php render_table($table);?>
     </div>
@@ -177,7 +180,7 @@ $table = ["data" => $results, "extra_classes" => "listTable", "ignored_columns" 
 
 <script>//LOADING IMAGES
 let imageCol = document.getElementsByClassName('image_url');
-for (let i=1; imageCol.length; i++){
+for (let i=0; imageCol.length; i++){
     let imageLink = imageCol[i].textContent;
     if (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/.test(imageLink)){
         imageCol[i].innerHTML = `<img class="img-fluid" src=${imageLink}></img>`;
