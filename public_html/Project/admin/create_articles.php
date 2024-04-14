@@ -27,7 +27,7 @@ if (isset($_POST["createForm"])) {
     $newsSUMMARY = se($article, "news_summary_long", null, false);
     $hasError = false;
 
-    if (empty($title) || empty($imageURL) || empty($newsTEXT) || empty($newsSUMMARY)) { //checks for all inputs.
+    if (empty($title) || empty($imageURL) || empty($newsTEXT) || empty($newsSUMMARY)) { //checks for all inputs. besides siteURL which isn't required
         flash("ALL Fields Required.", "danger");
         $hasError = true;
     }
@@ -105,12 +105,12 @@ if (isset($_POST["createForm"])) {
     <h3>Create Articles</h3>
     <form onsubmit="return validate(this)" method="POST">
         <div>
-            <?php render_input(["type" => "textarea", "id" => "title", "name" => "title", "label" => "Article Title", "placeholder" => "Title", "rules" => ["required" => true, "maxlength" => "100", "minlength" => "10"]]); ?>
+            <?php render_input(["type" => "textarea", "id" => "title", "name" => "title", "label" => "Article Title", "placeholder" => "Title", "rules" => [/*"required" => true,*/ "maxlength" => "100", "minlength" => "10"]]); ?>
             <?php render_input(["type" => "textarea", "id" => "site_url", "name" => "site_url", "label" => "Article Source", "placeholder" => "[NOT REQUIRED] https://website.com", "rules" => ["maxlength" => "2048"]]); //NOT REQUIRED
             ?>
-            <?php render_input(["type" => "textarea", "id" => "image_url", "name" => "image_url", "label" => "Article Image", "placeholder" => "https://image.com", "rules" => ["required" => true, "maxlength" => "2048"]]); ?>
-            <?php render_input(["type" => "textarea", "id" => "news_text", "name" => "news_text", "label" => "Main Article", "placeholder" => "Description", "rules" => ["required" => true, "minlength" => "500"]]); ?>
-            <?php render_input(["type" => "textarea", "id" => "news_summary_long", "name" => "news_summary_long", "label" => "Article Summary", "placeholder" => "Description Summary", "rules" => ["required" => true, "minlength" => "10", "maxlength" => "500"]]); ?>
+            <?php render_input(["type" => "textarea", "id" => "image_url", "name" => "image_url", "label" => "Article Image", "placeholder" => "https://image.com", "rules" => [/*"required" => true,*/ "maxlength" => "2048"]]); ?>
+            <?php render_input(["type" => "textarea", "id" => "news_text", "name" => "news_text", "label" => "Main Article", "placeholder" => "Description", "rules" => [/*"required" => true,*/ "minlength" => "500"]]); ?>
+            <?php render_input(["type" => "textarea", "id" => "news_summary_long", "name" => "news_summary_long", "label" => "Article Summary", "placeholder" => "Description Summary", "rules" => [/*"required" => true,*/ "minlength" => "10", "maxlength" => "500"]]); ?>
             <?php render_input(["type" => "hidden", "name" => "createForm", "value" => "createForm"]) ?>
             <?php render_button(["text" => "Create Article", "type" => "submit"]); ?>
         </div>
@@ -120,20 +120,21 @@ if (isset($_POST["createForm"])) {
 <script>
     function validate(form) {
         let title = form.title.value;
+        let siteURL = form.site_url.value;
         let imageURL = form.image_url.value;
         let newsTEXT = form.news_text.value;
         let newsSUMMARY = form.news_summary_long.value;
 
         let isValid = true;
 
-        //EXISTANCE of Everything
-        if (title === "" || imageURL === "" || newsTEXT === "" || newsSUMMARY === "") {
-            flash("[Client] All feilds be provided.", "danger");
+        //EXISTENCE of Everything besides siteURL which isn't required
+        if (title === "" || imageURL === "" || newsTEXT === "" || newsSUMMARY === "") { 
+            flash("[Client] All fields be provided.", "danger");
             isValid = false;
         }
         //TITLE
         if (title.length <= 10 || title.length >= 100) {
-            flash("[Client] Title Must Be 10-100 Characters.", "danger"); //current password should be atleast 8.
+            flash("[Client] Title Must Be 10-100 Characters.", "danger"); 
             isValid = false;
         }
         //siteURL

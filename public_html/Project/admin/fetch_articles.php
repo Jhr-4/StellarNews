@@ -9,90 +9,125 @@ if (!has_role("Admin")) {
 ?>
 <?php
 if(isset($_POST["articleDays"])){
-    $result = get('https://spacenews.p.rapidapi.com/datenews/1', "SPACE_API_KEY", $data = ["days" => $_POST["articleDays"]], true, 'spacenews.p.rapidapi.com');
+    //validation
+    $days = se($_POST, "articleDays", null, false);
+    $hasError = false;
 
-    error_log("API Response: " . var_export($result, true));
-    if (se($result, "status", 400, false) == 200 && isset($result["response"])) {
-        $result = json_decode($result["response"], true);
-    } else {
-        $result = [];
+    if ($days === null || $days === ""){
+        flash("ALL Fields Required.", "danger");
+        $hasError = true;
+    }
+    if (!($days > 0)){
+        flash("Days value must be greater than 0.", "danger");
+        $hasError = true;
     }
 
-    //data transformation
-    $data= [];
-    foreach ($result as $article){
-        $article["api_id"] = $article["id"];
-        unset($article["id"]);
-        $article["api_timestamp"] = $article["timestamp"];
-        unset($article["timestamp"]);
-        $temp["api_timestamp"] = str_replace("T", " ", $article["api_timestamp"]);
-        $temp["api_timestamp"] = str_replace("Z", "", $temp["api_timestamp"]);
-        $article["api_timestamp"] = $temp["api_timestamp"]; 
-        unset($article["news_summary_short"]);
-        unset($article["hashtags"]);
-        array_push($data, $article);
-    }
-    $result = $data;
+    if (!$hasError) {
+        $result = get('https://spacenews.p.rapidapi.com/datenews/'.$_POST["articleDays"], "SPACE_API_KEY", $data = ["days" => $_POST["articleDays"]], true, 'spacenews.p.rapidapi.com');
 
-    //getting data ready to insert into DB
-    $db = getDB();
-    $query = "INSERT INTO `ArticlesTable` ";
+        error_log("API Response: " . var_export($result, true));
+        if (se($result, "status", 400, false) == 200 && isset($result["response"])) {
+            $result = json_decode($result["response"], true);
+        } else {
+            $result = [];
+        }
 
-    //setting up colomns
-    $colomns = [];
-    foreach ($result as $articles){
-        foreach($articles as $k => $v){
-            if(!in_array("`$k`", $colomns)){
-                array_push($colomns, "`$k`");
+        //data transformation
+        $data= [];
+        foreach ($result as $article){
+            $article["api_id"] = $article["id"];
+            unset($article["id"]);
+            $article["api_timestamp"] = $article["timestamp"];
+            unset($article["timestamp"]);
+            $temp["api_timestamp"] = str_replace("T", " ", $article["api_timestamp"]);
+            $temp["api_timestamp"] = str_replace("Z", "", $temp["api_timestamp"]);
+            $article["api_timestamp"] = $temp["api_timestamp"]; 
+            unset($article["news_summary_short"]);
+            unset($article["hashtags"]);
+            array_push($data, $article);
+        }
+        $result = $data;
+
+        //getting data ready to insert into DB
+        $db = getDB();
+        $query = "INSERT INTO `ArticlesTable` ";
+
+        //setting up colomns
+        $colomns = [];
+        foreach ($result as $articles){
+            foreach($articles as $k => $v){
+                if(!in_array("`$k`", $colomns)){
+                    array_push($colomns, "`$k`");
+                }
             }
         }
-    }
-    $query .= "(" . join(",", $colomns) . ")";
+        $query .= "(" . join(",", $colomns) . ")";
 
-    //setting up the rows
-    $query .= " VALUES ";
-    $params = [];
-    $counter = 0;
-    foreach ($result as $articles){
-        $tempParams = [];
-        $counter++;
-        $query .= "(";
-        foreach($articles as $k => $v){
-            $tempParams[":$k".$counter] = $v;
-            $params[":$k".$counter] = $v;
+        //setting up the rows
+        $query .= " VALUES ";
+        $params = [];
+        $counter = 0;
+        foreach ($result as $articles){
+            $tempParams = [];
+            $counter++;
+            $query .= "(";
+            foreach($articles as $k => $v){
+                $tempParams[":$k".$counter] = $v;
+                $params[":$k".$counter] = $v;
+            }
+            $query .= join(",", array_keys($tempParams)) .",";
+            $query = rtrim($query,",");//removes the last comma before the ending prenthesis for that row
+            $query .= "),";
         }
-        $query .= join(",", array_keys($tempParams)) .",";
-        $query = rtrim($query,",");//removes the last comma before the ending prenthesis for that row
-        $query .= "),";
-    }
-    $query = rtrim($query,",");//removes the last comma after all the rows are added
-    $query .= " ON DUPLICATE KEY UPDATE `api_id` = `api_id`"; //replace old value with old value
+        $query = rtrim($query,",");//removes the last comma after all the rows are added
+        $query .= " ON DUPLICATE KEY UPDATE `api_id` = `api_id`"; //replace old value with old value
 
-    //actual insert into DB
-    try {
-        $stmt = $db->prepare($query);
-        $stmt->execute($params);
-        flash("Sucessfully inserted data", "success");
-    } catch (PDOException $error) {
-        error_log("Something went wrong with the query" . var_export($error, true));
-        flash("An Error Occured", "danger");
+        //actual insert into DB
+        try {
+            $stmt = $db->prepare($query);
+            $stmt->execute($params);
+            flash("Sucessfully inserted data", "success");
+        } catch (PDOException $error) {
+            error_log("Something went wrong with the query" . var_export($error, true));
+            flash("An Error Occured", "danger");
+            if($params ===[]){
+                flash("No Data From API...", "warning");
+            }
+        }
+        error_log("QUERY: " . $query);
+        error_log("Params: " . var_export($params, true));
     }
-
-    error_log("QUERY: " . $query);
-    error_log("Params: " . var_export($params, true));
 }
 
 ?>
 <div class="container-fluid"> 
     <h3>Fetch Articles</h3>
-    <form method="POST">
+    <form method="POST" onsubmit="return validate(this)">
         <div>
-            <?php render_input(["type"=>"number", "id"=>"articleDays", "name"=>"articleDays", "label"=>"Article Days", "placeholder"=>"1", "rules"=>["required"=>true]]);?>
+            <?php render_input(["type"=>"number", "id"=>"articleDays", "name"=>"articleDays", "label"=>"Article Days", "placeholder"=>"1", "rules"=>["required"=>true, "min"=>1,]]);?>
             <?php render_button(["text"=>"Fetch Articles", "type"=>"submit"]);?>
         </div>
     </form>
 </div>
+<script>
+function validate(form) {
+    let days = form.articleDays.value;
+    let isValid = true;
+   
+    //EXISTANCE of Everything
+    if (days === "" || articleDays === null){
+        flash("[Client] Days feild must be provided.", "danger");
+        isValid = false;
+    }
+    //validation of days
+    if (!(days > 0)){
+        flash("[Client] Days must be greater than 0.", "danger");
+        isValid = false;
+    }    
+    //return isValid;
+}
 
+</script>
 
 
 <?php

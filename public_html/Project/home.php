@@ -203,9 +203,10 @@ for ($i = 0; $i < count($results); $i++) { //adds data for null values (that wer
           <img class="card-img-top" style="height: 18em; object-fit: cover;" src="<?php se($article, "image_url", "Unknown", true) ?>" alt="Article image">
           <div class="card-body">
 
+            <h5 class="card-title"><?php se($article, "title", "Unknown", true) ?></h5>
             <!--DISPLAY LINK/SITE-->
-            <h6 class="card-subtitle mb-2 text-muted">From:
-              <a href="<?php se($article, "site_url", ""); ?>" target="_blank">
+            <h6 class="card-subtitle mb-2 text-muted">Credits:
+              <a class="text-decoration-none" href="<?php se($article, "site_url", ""); ?>" target="_blank">
                 <?php
                 //    /(https?:\/\/)?(www\.)?        [-a-zA-Z0-9@:%._\+~#=]{2,256}     \.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ 
                 //remove https://www.  &&    .top-domain/----
@@ -221,12 +222,9 @@ for ($i = 0; $i < count($results); $i++) { //adds data for null values (that wer
                 <?php se($article, "site_url", "Unknown"); ?>
               </a>
             </h6>
-
-
-            <h5 class="card-title"><?php se($article, "title", "Unknown", true) ?></h5>
           </div>
           <div class="card-footer text-center">
-            <a href="<?php se(get_url("view_articles.php/")); ?>?<?php se($article, "primary_key", "id"); ?>=<?php se($article, "id"); ?>" class="btn btn-success border-dark w-100">View More</a>
+            <a href="<?php se(get_url("view_articles.php/")); ?>?<?php se($article, "primary_key", "id"); ?>=<?php se($article, "id"); ?>" class="btn btn-success border-light w-100">View More &#11166;	</a>
           </div>
         </div>
       </div>

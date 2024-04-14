@@ -174,14 +174,14 @@ function validate(form) {
 
     let isValid = true;
    
-    //EXISTANCE of Everything
+    //EXISTANCE of Everything besides siteURL which isn't required
     if (title === "" || imageURL==="" || newsTEXT==="" || newsSUMMARY===""){
         flash("[Client] All feilds be provided.", "danger");
         isValid = false;
     }
     //TITLE
     if (title.length <= 10 || title.length >= 100){
-            flash("[Client] Title Must Be 10-100 Characters.", "danger"); //current password should be atleast 8.
+            flash("[Client] Title Must Be 10-100 Characters.", "danger"); 
             isValid = false;
     }
     //siteURL
