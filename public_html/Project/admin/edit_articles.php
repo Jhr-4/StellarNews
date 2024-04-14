@@ -81,7 +81,15 @@ if(isset($_POST["title"])){
             flash("Updated data", "success");
         } catch (PDOException $error) {
             error_log("Error Updating: " . var_export($error, true));
-            flash("An Error Occured", "danger");
+            $errorInfo = $error->errorInfo;
+            if ($errorInfo[1] === 1062) {
+                preg_match("/ArticlesTable.(\w+)/", $errorInfo[2], $matches);
+                if (isset($matches[1])) {
+                flash("The chosen title is not available. Try again.", "warning");
+                }
+            } else {
+                flash("An Error Occured", "danger");
+            }
         }
 
         error_log("QUERY: " . $query);
@@ -95,7 +103,7 @@ if(isset($_POST["title"])){
 $article = [];
 if ($id>-1){
     $db = getDB();
-    $query = "SELECT api_id, api_timestamp, title, site_url, image_url, news_text, news_summary_long, created FROM  `ArticlesTable` WHERE id=:id";
+    $query = "SELECT api_id, api_timestamp, title, site_url, image_url, news_text, news_summary_long, created FROM `ArticlesTable` WHERE id=:id";
     try{
         $stmt = $db->prepare($query);
         $stmt->execute([":id"=>$id]);
@@ -111,7 +119,7 @@ if ($id>-1){
     flash("invalid id passed", "danger");
     die(header("Location:" . get_url("admin/list_articles.php ")));
 }
-
+//displaying
 if($article){
     $isAPI = true;
     if($article['api_timestamp'] === null){
@@ -135,6 +143,9 @@ if($article){
             $form[$k]["value"] = $article[$v["name"]];
         }
     }
+} else {
+    flash("Invalid id passed", "danger"); //invalid id because id is too big compared to results in the db that it formed no $article/result...
+    die(header("Location:" . get_url("admin/list_articles.php")));
 }
 
 ?>

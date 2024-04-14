@@ -8,7 +8,7 @@ if (!has_role("Admin")) {
 }
 
 $article_id = se($_GET, "id", -1, false);
-if ($article_id < 1){
+if ($article_id < -1){
     flash("Invalid Article ID Passed to Delete", "danger");
     die(header("Location: " . get_url("admin/list_articles.php")));
 }

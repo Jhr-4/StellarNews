@@ -23,8 +23,12 @@ if ($id>-1){
         flash ("Error fetching record", "danger");
     }
 } else {
-    flash("invalid id passed", "danger");
-    die(header("Location:" . get_url("admin/list_articles.php ")));
+        flash("Invalid id passed", "danger");
+        if(has_role('Admin')){
+            die(header("Location:" . get_url("admin/list_articles.php")));
+        } else {
+            die(header("Location:" . get_url("home.php")));
+        }
 }
 
 if($article){
@@ -34,22 +38,36 @@ if($article){
         $article['api_timestamp'] = $article['created'];
     }
 
-
-if ($article['is_active'] === 1){
-    $article['is_active'] = "True"; 
+    if ($article['is_active'] === 1){
+        $article['is_active'] = "True"; 
+    } else {
+        $article['is_active'] = "False";
+        if (!has_role("Admin")){//Boots non-admin users out of page... JUST INCASE it was shared link..
+            flash("Article has been disabled.", "danger");
+            die(header("Location:" . get_url("home.php")));
+        }
+    }
 } else {
-    $article['is_active'] = "False";
-}
-
+    flash("Invalid id passed", "danger");
+    if(has_role('Admin')){
+        die(header("Location:" . get_url("admin/list_articles.php")));
+    } else {
+        die(header("Location:" . get_url("home.php")));
+    }
 }
 
 
 
 ?>
-
+<?php if($article) :?>
 <div class="container-fluid"> 
     <h3>Viewing Article</h3>
-    <a class="btn btn-primary mb-3" href="<?php echo get_url('admin/list_articles.php'); ?>">Return</a>
+    <!--BACK BUTTON-->
+    <?php if (has_role("Admin")) :?>
+    <a class="btn btn-primary mb-3" href="<?php echo get_url('admin/list_articles.php'); ?>">Return To Admin List</a>
+    <?php else :?>
+        <a class="btn btn-primary mb-3" href="<?php echo get_url('home.php'); ?>">Return To Home</a>
+    <?php endif ?>
     <div class="card mx-auto w-75 mb-3 shadow p-3 mb-5 bg-body rounded">
         <div class="card-body">
             <!--TITLE-->
@@ -79,6 +97,8 @@ if ($article['is_active'] === 1){
                 <a class="btn btn-danger" href="<?php echo get_url("admin/delete_articles.php?id=$id"); ?>">Toggle</a>
                 <p class="text-primary">
                     <b>Active Status: <span class="text-success"><?php se($article, "is_active", "Unknown"); ?></span></b>
+                    <br>
+                    <b>API ID: <span class="text-success"><?php se($article, "api_id", "N/A"); ?></span></b>
                 </p>
             <?php endif; ?>
             </div>
@@ -99,7 +119,7 @@ if ($article['is_active'] === 1){
         </div>
     </div>
 </div>
-
+<?php endif ?>
 
 <?php
 require_once(__DIR__ . "/../../partials/flash.php");
