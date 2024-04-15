@@ -7,7 +7,10 @@
     <?php if ($messages) : ?>
         <?php foreach ($messages as $msg) : ?>
             <div class="row justify-content-center">
-                <div class="alert alert-<?php se($msg, 'color', 'info'); ?>" role="alert"><?php se($msg, "text", ""); ?></div>
+                <div class="alert-dismissible fade show alert alert-<?php se($msg, 'color', 'info'); ?>" role="alert">
+                    <?php se($msg, "text", ""); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             </div>
         <?php endforeach; ?>
     <?php endif; ?>
