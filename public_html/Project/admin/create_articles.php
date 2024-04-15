@@ -19,7 +19,7 @@ if (isset($_POST["createForm"])) {
     //VALIDATION
     $title = se($article, "title", null, false);
     $siteURL = se($article, "site_url", null, false);
-    if ($siteURL === "") { //JUST INCASE
+    if ($siteURL === "" || $siteURL === null || empty($siteURL)) { //JUST INCASE
         $article["site_url"] = null;
     }
     $imageURL = se($article, "image_url", null, false);
@@ -105,12 +105,12 @@ if (isset($_POST["createForm"])) {
     <h3>Create Articles</h3>
     <form onsubmit="return validate(this)" method="POST">
         <div>
-            <?php render_input(["type" => "textarea", "id" => "title", "name" => "title", "label" => "Article Title", "placeholder" => "Title", "rules" => [/*"required" => true,*/ "maxlength" => "100", "minlength" => "10"]]); ?>
+            <?php render_input(["type" => "textarea", "id" => "title", "name" => "title", "label" => "Article Title", "placeholder" => "Title", "rules" => ["required" => true, "maxlength" => "100", "minlength" => "10"]]); ?>
             <?php render_input(["type" => "textarea", "id" => "site_url", "name" => "site_url", "label" => "Article Source", "placeholder" => "[NOT REQUIRED] https://website.com", "rules" => ["maxlength" => "2048"]]); //NOT REQUIRED
             ?>
-            <?php render_input(["type" => "textarea", "id" => "image_url", "name" => "image_url", "label" => "Article Image", "placeholder" => "https://image.com", "rules" => [/*"required" => true,*/ "maxlength" => "2048"]]); ?>
-            <?php render_input(["type" => "textarea", "id" => "news_text", "name" => "news_text", "label" => "Main Article", "placeholder" => "Description", "rules" => [/*"required" => true,*/ "minlength" => "500"]]); ?>
-            <?php render_input(["type" => "textarea", "id" => "news_summary_long", "name" => "news_summary_long", "label" => "Article Summary", "placeholder" => "Description Summary", "rules" => [/*"required" => true,*/ "minlength" => "10", "maxlength" => "500"]]); ?>
+            <?php render_input(["type" => "textarea", "id" => "image_url", "name" => "image_url", "label" => "Article Image", "placeholder" => "https://image.com", "rules" => ["required" => true, "maxlength" => "2048"]]); ?>
+            <?php render_input(["type" => "textarea", "id" => "news_text", "name" => "news_text", "label" => "Main Article", "placeholder" => "Description", "rules" => ["required" => true, "minlength" => "500"]]); ?>
+            <?php render_input(["type" => "textarea", "id" => "news_summary_long", "name" => "news_summary_long", "label" => "Article Summary", "placeholder" => "Description Summary", "rules" => ["required" => true, "minlength" => "10", "maxlength" => "500"]]); ?>
             <?php render_input(["type" => "hidden", "name" => "createForm", "value" => "createForm"]) ?>
             <?php render_button(["text" => "Create Article", "type" => "submit"]); ?>
         </div>

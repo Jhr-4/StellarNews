@@ -19,11 +19,14 @@ if(isset($_POST["title"])){
         $article = $_POST;
     }
     //VALIDATION
-    $title = se($_POST, "title", null, false);
-    $siteURL = se($_POST, "site_url", null, false);
-    $imageURL = se($_POST, "image_url", null, false);
-    $newsTEXT = se($_POST, "news_text", null, false);
-    $newsSUMMARY = se($_POST, "news_summary_long", null, false);
+    $title = se($article, "title", null, false);
+    $siteURL = se($article, "site_url", null, false);
+    if ($siteURL === "" || $siteURL === null || empty($siteURL)) { //JUST INCASE
+        $article["site_url"] = null;
+    }
+    $imageURL = se($article, "image_url", null, false);
+    $newsTEXT = se($article, "news_text", null, false);
+    $newsSUMMARY = se($article, "news_summary_long", null, false);
     $hasError = false;
 
     if (empty($title) || empty($imageURL) || empty($newsTEXT) || empty($newsSUMMARY)) {//checks for all inputs. siteURL is optional

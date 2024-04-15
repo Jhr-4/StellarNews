@@ -26,12 +26,13 @@ if(isset($_POST["articleDays"])){
         $result = get('https://spacenews.p.rapidapi.com/datenews/'.$_POST["articleDays"], "SPACE_API_KEY", $data = ["days" => $_POST["articleDays"]], true, 'spacenews.p.rapidapi.com');
 
         error_log("API Response: " . var_export($result, true));
-        if (se($result, "status", 400, false) == 200 && isset($result["response"])) {
+        if (se($result, "status", 400, false) == 200 && isset($result["response"]) && $result["response"]!=="") {
             $result = json_decode($result["response"], true);
         } else {
             $result = [];
         }
 
+        if ($result !== []){ //Avoids db and data transformation.. if theres no result..
         //data transformation
         $data= [];
         foreach ($result as $article){
@@ -44,7 +45,12 @@ if(isset($_POST["articleDays"])){
             $article["api_timestamp"] = $temp["api_timestamp"]; 
             unset($article["news_summary_short"]);
             unset($article["hashtags"]);
-            array_push($data, $article);
+            foreach ($article as $k => $v) { //extra unsetting just incase they add more unwanted api data someday...
+                if (!in_array($k, ["title", "site_url", "image_url", "news_text", "news_summary_long"])) {
+                    unset($article[$k]);
+                }
+            }
+            array_push($data, $article); //Makes $data have the changes made in the local var $article
         }
         $result = $data;
 
@@ -96,6 +102,9 @@ if(isset($_POST["articleDays"])){
         }
         error_log("QUERY: " . $query);
         error_log("Params: " . var_export($params, true));
+        } else {
+            flash("An Error Occured. There were no results to fetch.", "danger");
+        }
     }
 }
 
