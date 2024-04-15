@@ -1,0 +1,2 @@
+ALTER TABLE `ArticlesTable` 
+ADD COLUMN `is_active` TINYINT(1) DEFAULT 1 NOT NULL
