@@ -133,7 +133,7 @@ function validate(form) {
         flash("[Client] Days must be greater than 0.", "danger");
         isValid = false;
     }    
-    //return isValid;
+    return isValid;
 }
 
 </script>
