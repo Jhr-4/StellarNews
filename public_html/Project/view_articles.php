@@ -25,9 +25,9 @@ if ($id>-1){
 } else {
         flash("Invalid id passed", "danger");
         if(has_role('Admin')){
-            die(header("Location:" . get_url("admin/list_articles.php")));
+            redirect("admin/list_articles.php");
         } else {
-            die(header("Location:" . get_url("home.php")));
+            redirect("home.php");
         }
 }
 
@@ -44,15 +44,15 @@ if($article){
         $article['is_active'] = "False";
         if (!has_role("Admin")){//Boots non-admin users out of page... JUST INCASE it was shared link..
             flash("Article has been disabled.", "danger");
-            die(header("Location:" . get_url("home.php")));
+            redirect("home.php");
         }
     }
 } else {
     flash("Invalid id passed", "danger");
     if(has_role('Admin')){
-        die(header("Location:" . get_url("admin/list_articles.php")));
+        redirect("admin/list_articles.php");
     } else {
-        die(header("Location:" . get_url("home.php")));
+        redirect("home.php");
     }
 }
 
