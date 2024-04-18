@@ -41,10 +41,10 @@ require_once(__DIR__ . "/../lib/functions.php");
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
     <?php if (is_logged_in()) : ?>
-        <a class="navbar-brand mb-0 h1" href="<?php echo get_url('home.php'); ?>">StellarNews</a>
+        <a class="navbar-brand mb-0 h1 border border-white" href="<?php echo get_url('home.php'); ?>">StellarNews</a>
     <?php endif; ?>
     <?php if (!is_logged_in()) : ?>
-        <a class="navbar-brand mb-0 h1" href="<?php echo get_url('login.php'); ?>">StellarNews</a>
+        <a class="navbar-brand mb-0 h1 border border-white" href="<?php echo get_url('login.php'); ?>">StellarNews</a>
     <?php endif; ?>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -56,6 +56,7 @@ require_once(__DIR__ . "/../lib/functions.php");
                 <?php if (is_logged_in()) : ?>
                     <li class="nav-item"><a class="nav-link" href="<?php echo get_url('home.php'); ?>">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="<?php echo get_url('profile.php'); ?>">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?php echo get_url('favorites.php'); ?>">Favorites</a></li>
                 <?php endif; ?>
 
                 <?php if (!is_logged_in()) : ?>

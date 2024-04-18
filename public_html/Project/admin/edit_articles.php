@@ -4,7 +4,7 @@ require(__DIR__ . "/../../../partials/nav.php");
 
 if (!has_role("Admin")) {
     flash("You don't have permission to view this page", "warning");
-    die(header("Location: " . get_url("home.php")));
+    redirect("home.php");
 }
 ?>
 
@@ -120,7 +120,7 @@ if ($id>-1){
     }
 } else {
     flash("invalid id passed", "danger");
-    die(header("Location:" . get_url("admin/list_articles.php ")));
+    redirect("admin/list_articles.php");
 }
 //displaying
 if($article){
@@ -148,7 +148,7 @@ if($article){
     }
 } else {
     flash("Invalid id passed", "danger"); //invalid id because id is too big compared to results in the db that it formed no $article/result...
-    die(header("Location:" . get_url("admin/list_articles.php")));
+    redirect("admin/list_articles.php");
 }
 
 ?>
