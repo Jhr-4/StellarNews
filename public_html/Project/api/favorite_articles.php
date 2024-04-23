@@ -27,6 +27,17 @@ if(isset($_GET["article_id"]) && is_logged_in()){
             flash("An Error Occured Toggling Favorite", "danger");
             error_log(var_export($e->errorInfo, true));
         }
+} else if (isset($_GET["toggle_all"])){
+    $db = getDB();
+    $stmt = $db->prepare("UPDATE `UserArticles` SET is_active = !is_active WHERE user_id = :user_id AND is_active = 1");
+    try {
+        $stmt->execute([":user_id"=>get_user_id()]);
+        flash("Unfavorited All Article", "success");
+    } catch (PDOException $e) {
+        flash("An Error Occured Toggling Favorite", "danger");
+        error_log(var_export($e->errorInfo, true));
+    }
+    redirect("favorites.php");
 }
 
 redirect("home.php");

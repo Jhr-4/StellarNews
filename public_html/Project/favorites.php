@@ -2,10 +2,6 @@
 require(__DIR__ . "/../../partials/nav.php");
 ?>
 
-<div class="container-fluid mb-3">
-    <h1 class="card-header">Favorited Articles </h1>
-</div>
-
 <?php
 
 $form = [
@@ -23,8 +19,11 @@ $form = [
 //LOADING  ARTICLES
 
 
-$query = "SELECT ArticlesTable.id, title, site_url, image_url, news_text, news_summary_long, ArticlesTable.is_active, UserArticles.user_id, UserArticles.is_active AS userArticle_isActive FROM  `ArticlesTable` 
-LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id WHERE UserArticles.user_id = :user_id AND UserArticles.is_active";
+$query = "SELECT ArticlesTable.id, title, site_url, image_url, news_text, news_summary_long, ArticlesTable.is_active, UserArticles.user_id, UserArticles.is_active AS userArticle_isActive 
+FROM  `ArticlesTable` 
+LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id 
+WHERE UserArticles.user_id = :user_id AND UserArticles.is_active";
+
 $params = [];
 $params[":user_id"] = get_user_id();
 $session_key = $_SERVER["SCRIPT_NAME"];
@@ -121,9 +120,10 @@ try {
         $results = $r;
     }
 } catch (PDOException $error) {
-    error_log("Error fetching stocks: " . var_export($error, true));
+    error_log("Error fetching articles: " . var_export($error, true));
     flash("An error occured", "danger");
 }
+
 for ($i = 0; $i < count($results); $i++) { //adds data for null values (that were added by manual create)
     foreach ($results[$i] as $k => $v) {
         if ($v === null) {
@@ -136,15 +136,45 @@ for ($i = 0; $i < count($results); $i++) { //adds data for null values (that wer
         }
     }
 }
-//var_dump($results);
+$totalShown = count($results); //counts total shown
+
+
+//COUNTING TOTAL FAVORITED
+$totalFavorited = get_total_count("`ArticlesTable` 
+                                    LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id
+                                    WHERE UserArticles.user_id = :user_id AND UserArticles.is_active",
+                                    ["user_id"=>get_user_id()]);
+/* ORIGINAL CODE before DB HELPER
+$query2 = "SELECT count(ArticlesTable.id) as totalFav FROM  `ArticlesTable` 
+LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id 
+WHERE UserArticles.user_id = :user_id AND UserArticles.is_active";
+$params2 = [];
+$params2[":user_id"] = get_user_id();
+$stmt = $db->prepare($query2);
+$totalFavorited;
+try {
+    $stmt->execute($params2);
+    $r = $stmt->fetchAll();
+    if ($r) {
+        $totalFavorited = $r[0]["totalFav"];
+    }
+} catch (PDOException $error) {
+    error_log("Error fetching total favorited articles: " . var_export($error, true));
+    flash("An error occured", "danger");
+}*/
 ?>
 
 <div class="container-fluid">
     <?php if (empty($results)) { //For if query brings no articles (usally from sorting)
         flash("No Articles to Show", "warning");
     } ?>
-    <!--SORTING-->    
-    <div class="card card-body border-0 bg-primary bg-opacity-10 mb-3">
+
+    <div class="container-fluid mb-3">
+        <h1 class="col-lg-auto col-md-auto col-sm-auto">Favorited Articles </h1>
+    </div>
+
+    <!--SORTING-->
+    <div class="card card-body border-0 bg-primary bg-opacity-10">
         <form method="GET">
             <div class="row mb-3" style="align-items: baseline;">
                 <?php foreach ($form as $k => $v) : ?>
@@ -153,46 +183,76 @@ for ($i = 0; $i < count($results); $i++) { //adds data for null values (that wer
                     </div>
                 <?php endforeach; ?>
             </div>
-            <?php render_button(["text" => "Filter", "type" => "submit"]); ?>
-            <a href="?clear" class="btn btn-secondary">Reset</a>
+            <div class="row justify-content-between">
+                <!--SHOWING BUTTONS-->
+                <div class="col-lg-auto col-md-auto col-sm-auto col-auto mb-0">
+                    <?php render_button(["text" => "Filter", "type" => "submit"]); ?>
+                    <a href="?clear" class="btn btn-secondary">Reset</a>
+                </div>
+                <!--SHOWING INFORMATION-->
+                <header class="mx-3 col-xl-auto col-lg-auto col-md-auto col-sm-auto col-auto text-center  p-2">
+                    <h5 class="mb-0">Results: <?php render_result_counts($totalShown, $totalFavorited); ?></h5>
+                </header>
+            </div>
         </form>
     </div>
+</div>
+<script>
+    function unfavoriteAll() {
+        console.log("hey");
+        if (confirm("Are you sure you want to unfavorite everything?")) {
+            window.location.href = 'api/favorite_articles.php?toggle_all';
+        } else {
+            flash("You safely exited the menu with 0 changes to favorites.", "primary");
+        }
+    }
+</script>
+<!-- DELETE ALL-->
 
+<div class="container-fluid">
+    <button onclick="unfavoriteAll()" class="btn btn-danger mt-3" data-toggle="tooltip" data-placement="top" title="Unfavorite ALL">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
+        </svg>
+        Unfavorite All
+    </button>
+</div>
 
-    <!--CARD ARTICLE DISPLAYING-->
-    <div class="row row-cols-1 row-cols-lg-4 row-cols-sm-2 g-4 mx-auto my-3">
-        <?php foreach ($results as $article) : ?>
-            <?php
-            if ($article['is_active'] === "False") {
-                continue; //Will skip the card if it's not active.
-            }
-            ?>
-            <div class="col d-flex">
-                <div class="card text-bg-light border-dark flex-fill">
-                    <img class="card-img-top" style="height: 18em; object-fit: cover;" src="<?php se($article, "image_url", "Unknown", true) ?>" alt="Article image">
-                    <div class="card-body">
+<!--CARD ARTICLE DISPLAYING-->
+<div class="row row-cols-1 row-cols-lg-4 row-cols-sm-2 g-4 mx-auto">
+    <?php foreach ($results as $article) : ?>
+        <?php
+        if ($article['is_active'] === "False") {
+            continue; //Will skip the card if it's not active.
+        }
+        ?>
+        <div class="col d-flex">
+            <div class="card bg-dark text-white border-white flex-fill mt-3">
+                <img class="card-img" style="height: 18em; object-fit: cover;" src="<?php se($article, "image_url", "Unknown", true) ?>" alt="Article image">
+                <div class="card-img-overlay bg-dark opacity-75 ">
+                </div>
+                <div class="card-img-overlay d-flex flex-column">
+                    <h5 class="card-title"><?php se($article, "title", "Unknown", true) ?></h5>
+                    <!--DISPLAY LINK/SITE-->
+                    <h6 class="card-subtitle text-light">Credits:
+                        <a class="text-decoration-none text-info" href="<?php se($article, "site_url", ""); ?>" target="_blank">
+                            <?php
+                            //    /(https?:\/\/)?(www\.)?        [-a-zA-Z0-9@:%._\+~#=]{2,256}     \.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ 
+                            //remove https://www.  &&    .top-domain/----
+                            if ($article['site_url']) {
+                                if (preg_match('/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/', $article['site_url'])) {
+                                    $article['site_url'] = preg_replace('/(https?:\/\/)?(www\.)?/', '', $article['site_url']);
+                                    $article['site_url'] = preg_replace('/\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/', '', $article['site_url']);
+                                }
+                            } else {
+                                $article['site_url'] = "StellarNews";
+                            } //if theres no SITE URL its custom made aka made by StellarNews
+                            ?>
+                            <?php se($article, "site_url", "Unknown"); ?>
+                        </a>
+                    </h6>
 
-                        <h5 class="card-title"><?php se($article, "title", "Unknown", true) ?></h5>
-                        <!--DISPLAY LINK/SITE-->
-                        <h6 class="card-subtitle mb-2 text-muted">Credits:
-                            <a class="text-decoration-none" href="<?php se($article, "site_url", ""); ?>" target="_blank">
-                                <?php
-                                //    /(https?:\/\/)?(www\.)?        [-a-zA-Z0-9@:%._\+~#=]{2,256}     \.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ 
-                                //remove https://www.  &&    .top-domain/----
-                                if ($article['site_url']) {
-                                    if (preg_match('/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/', $article['site_url'])) {
-                                        $article['site_url'] = preg_replace('/(https?:\/\/)?(www\.)?/', '', $article['site_url']);
-                                        $article['site_url'] = preg_replace('/\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/', '', $article['site_url']);
-                                    }
-                                } else {
-                                    $article['site_url'] = "StellarNews";
-                                } //if theres no SITE URL its custom made aka made by StellarNews
-                                ?>
-                                <?php se($article, "site_url", "Unknown"); ?>
-                            </a>
-                        </h6>
-                    </div>
-                    <div class="card-footer text-center">
+                    <div class="text-center mt-auto">
 
                         <!--CLICK TO FAVORITE (White Heart becomes Red); IF NOT EXIST IN TABLE, LINK = ?ARTICLE_ID-->
                         <?php if (($article["user_id"]) === "N/A") /*"N/A" b/c values being set to N/A if it's null earlier*/ : ?>
@@ -203,7 +263,7 @@ for ($i = 0; $i < count($results); $i++) { //adds data for null values (that wer
                             </a>
                         <?php else : ?>
                             <!--Else IT EXSITS => TOGGLE, LINK = ?TOGGEL_ARTICLE_ID-->
-                            <a class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Unfavorite" href="<?php echo get_url('api/favorite_articles.php?toggle_article_id=' . $article["id"]); ?>">
+                            <a class="btn btn-danger border-light" data-toggle="tooltip" data-placement="top" title="Unfavorite" href="<?php echo get_url('api/favorite_articles.php?toggle_article_id=' . $article["id"]); ?>">
                                 <!--1 = ACTIVE FAVORITE = CLICK TO UNFAVORITE (RED Heart Becomes White)-->
                                 <?php if ($article["userArticle_isActive"] === 1) : ?>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-heart" viewBox="0 0 16 16">
@@ -228,12 +288,9 @@ for ($i = 0; $i < count($results); $i++) { //adds data for null values (that wer
                     </div>
                 </div>
             </div>
-        <?php endforeach; ?>
-    </div>
+        </div>
+    <?php endforeach; ?>
 </div>
-
-
-
 
 <?php
 require(__DIR__ . "/../../partials/flash.php");

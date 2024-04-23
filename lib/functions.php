@@ -32,4 +32,6 @@ require_once(__DIR__ . "/render_functions.php");
 require_once(__DIR__ . "/api_helper.php");
 //SESSION STORE DATA
 require_once(__DIR__ . "/session_store.php");
+
+require(__DIR__ . "/db_helpers.php");
 ?>
