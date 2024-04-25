@@ -132,7 +132,7 @@ function get_total_count($table_refs, $params = []) {
             unset($params[$k]);
         }
     }
-    $query = "SELECT count(1) as totalCount FROM $table_refs";
+    $query = "SELECT count(DISTINCT title) as totalCount FROM $table_refs";//no duplicate titles selected
     try {
         $db = getDB();
         $stmt = $db->prepare($query);

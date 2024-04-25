@@ -1,5 +1,12 @@
 <?php
-require(__DIR__ . "/../../partials/nav.php");
+require(__DIR__ . "/../../../partials/nav.php");
+
+if (!has_role("Admin")) {
+    flash("You don't have permission to view this page", "warning");
+    //die(header("Location: $BASE_PATH" . "/home.php"));
+    redirect("$BASE_PATH" . "/home.php");
+}
+
 ?>
 
 <?php
@@ -11,21 +18,18 @@ $form = [
     ["type" => "datetime-local", "id" => "MAX_timestamp", "name" => "MAX_timestamp", "label" => "Article Uploaded Before", "include_margin" => false],
     ["type" => "datetime-local", "id" => "MIN_timestamp", "name" => "MIN_timestamp", "label" => "Article Upload After", "include_margin" => false],
 
-    //["type" => "select", "name" => "sort", "label" => "Sort", "options" => ["created" => "Date"], "include_margin" => false],
+    ["type" => "select", "name" => "sort", "label" => "Sort", "options" => ["created" => "Date", "api_id" => "API ID"], "include_margin" => false],
     ["type" => "select", "class" => "test", "name" => "order", "label" => "Order", "options" => ["desc" => "Newest", "asc" => "Oldest"], "include_margin" => false],
 
     ["type" => "number", "name" => "limit", "label" => "Limit", "value" => "10", "placeholder" => "10", "include_margin" => false],
 ];
 //LOADING  ARTICLES
-
-
-$query = "SELECT ArticlesTable.id, title, site_url, image_url, news_text, news_summary_long, ArticlesTable.is_active, UserArticles.user_id, UserArticles.is_active AS userArticle_isActive 
+$query = "SELECT DISTINCT title, ArticlesTable.id, site_url, image_url, news_text, news_summary_long, ArticlesTable.is_active, UserArticles.is_active AS userArticle_isActive, ArticlesTable.created, ArticlesTable.api_id
 FROM  `ArticlesTable` 
-LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id 
-WHERE UserArticles.user_id = :user_id AND UserArticles.is_active";
-
+LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id AND UserArticles.is_active
+WHERE UserArticles.is_active IS NULL";
+//selects where article id is associated and is_active = 1 => when selecting is null it selects those with 0
 $params = [];
-$params[":user_id"] = get_user_id();
 $session_key = $_SERVER["SCRIPT_NAME"];
 
 //RESET/CLEAR FILTERS BUTTON
@@ -79,7 +83,7 @@ if (count($_GET) > 0) { //if theres _GET
         $params[":MIN_timestamp"] = $MIN_timestamp;
     }
 
-    //sort and order SORT ISN"T THERE SO IT SHOULD JUST BE CREATED ALWAYS.
+    //sort and order 
     $sort = se($_GET, "sort", "created", false);
     if (!in_array($sort, ["api_id", "created"])) {
         $sort = "created";
@@ -124,11 +128,13 @@ try {
     flash("An error occured", "danger");
 }
 
+$article_titles = []; //to find duplicate articles that are of multiple users
 for ($i = 0; $i < count($results); $i++) { //adds data for null values (that were added by manual create)
     foreach ($results[$i] as $k => $v) {
         if ($v === null) {
             $results[$i][$k] = "N/A";
         }
+
         if ($k === 'is_active' && $v === 1) {
             $results[$i][$k] = "True";
         } else if ($k === 'is_active' && $v === 0) {
@@ -136,41 +142,27 @@ for ($i = 0; $i < count($results); $i++) { //adds data for null values (that wer
         }
     }
 }
-$totalShown = count($results); //counts total shown
+foreach ($results as $k => $v) {
+    if (!isset($v['title'])) {
+        unset($results[$k]);
 
+    }
+}
 
 //COUNTING TOTAL FAVORITED
 $totalFavorited = get_total_count("`ArticlesTable` 
-                                    LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id
-                                    WHERE UserArticles.user_id = :user_id AND UserArticles.is_active",
-                                    ["user_id"=>get_user_id()]);
-/* ORIGINAL CODE before DB HELPER
-$query2 = "SELECT count(ArticlesTable.id) as totalFav FROM  `ArticlesTable` 
-LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id 
-WHERE UserArticles.user_id = :user_id AND UserArticles.is_active";
-$params2 = [];
-$params2[":user_id"] = get_user_id();
-$stmt = $db->prepare($query2);
-$totalFavorited;
-try {
-    $stmt->execute($params2);
-    $r = $stmt->fetchAll();
-    if ($r) {
-        $totalFavorited = $r[0]["totalFav"];
-    }
-} catch (PDOException $error) {
-    error_log("Error fetching total favorited articles: " . var_export($error, true));
-    flash("An error occured", "danger");
-}*/
-?>
+                                    LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id AND UserArticles.is_active
+                                    WHERE UserArticles.is_active IS NULL");
+$totalShown = count($results); //counts total shown
 
+?>
 <div class="container-fluid">
     <?php if (empty($results)) { //For if query brings no articles (usally from sorting)
         flash("No Articles to Show", "warning");
     } ?>
 
     <div class="container-fluid mb-3">
-        <h1 class="col-lg-auto col-md-auto col-sm-auto">Favorited Articles </h1>
+        <h1 class="col-lg-auto col-md-auto col-sm-auto">Not Favorited Articles </h1>
     </div>
 
     <!--SORTING-->
@@ -197,35 +189,10 @@ try {
         </form>
     </div>
 </div>
-
-<!-- DELETE ALL-->
-<script>
-    function unfavoriteAll() {
-        console.log("hey");
-        if (confirm("Are you sure you want to unfavorite everything?")) {
-            window.location.href = 'api/favorite_articles.php?toggle_all';
-        } else {
-            flash("You safely exited the menu with 0 changes to favorites.", "primary");
-        }
-    }
-</script>
-
-<div class="container-fluid">
-    <button onclick="unfavoriteAll()" class="btn btn-danger mt-3" data-toggle="tooltip" data-placement="top" title="Unfavorite ALL">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
-            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
-        </svg>
-        Unfavorite All
-    </button>
-</div>
-
 <!--CARD ARTICLE DISPLAYING-->
 <div class="row row-cols-1 row-cols-lg-4 row-cols-sm-2 g-4 mx-auto">
     <?php foreach ($results as $article) : ?>
         <?php
-        if ($article['is_active'] === "False") {
-            continue; //Will skip the card if it's not active.
-        }
         ?>
         <div class="col d-flex">
             <div class="card bg-dark text-white border-white flex-fill mt-3">
@@ -233,7 +200,14 @@ try {
                 <div class="card-img-overlay bg-dark opacity-75 ">
                 </div>
                 <div class="card-img-overlay d-flex flex-column">
-                    <h5 class="card-title"><?php se($article, "title", "Unknown", true) ?></h5>
+                    <!--DISPLAY TITLE-->
+                    <h5 class="card-title">
+                        <?php if ($article['is_active'] === "False") : ?>
+                            <span class="text-danger">[Disabled] </span><?php se($article, "title", "Unknown", true); ?>
+                        <?php else : ?>
+                            <?php se($article, "title", "Unknown", true); ?>
+                        <?php endif; ?>
+                    </h5>
                     <!--DISPLAY LINK/SITE-->
                     <h6 class="card-subtitle text-light">Credits:
                         <a class="text-decoration-none text-info" href="<?php se($article, "site_url", ""); ?>" target="_blank">
@@ -252,33 +226,7 @@ try {
                             <?php se($article, "site_url", "Unknown"); ?>
                         </a>
                     </h6>
-
                     <div class="text-center mt-auto">
-
-                        <!--CLICK TO FAVORITE (White Heart becomes Red); IF NOT EXIST IN TABLE, LINK = ?ARTICLE_ID-->
-                        <?php if (($article["user_id"]) === "N/A") /*"N/A" b/c values being set to N/A if it's null earlier*/ : ?>
-                            <a class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Favorite" href="<?php echo get_url('api/favorite_articles.php?article_id=' . $article["id"]); ?>">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
-                                    <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1" />
-                                </svg>
-                            </a>
-                        <?php else : ?>
-                            <!--Else IT EXSITS => TOGGLE, LINK = ?TOGGEL_ARTICLE_ID-->
-                            <a class="btn btn-danger border-light" data-toggle="tooltip" data-placement="top" title="Unfavorite" href="<?php echo get_url('api/favorite_articles.php?toggle_article_id=' . $article["id"]); ?>">
-                                <!--1 = ACTIVE FAVORITE = CLICK TO UNFAVORITE (RED Heart Becomes White)-->
-                                <?php if ($article["userArticle_isActive"] === 1) : ?>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-heart" viewBox="0 0 16 16">
-                                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15" />
-                                    </svg>
-                                <?php else : ?>
-                                    <!--ELSE IT'S 0 = NOT ACTIVE FAVORITE = CLICK TO FAVORITE (White Heart Becomes Red)-->
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
-                                        <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1" />
-                                    </svg>
-                                <?php endif; ?>
-                            </a>
-                        <?php endif; ?>
-
                         <!--SINGLE VIEW-->
                         <a href="<?php se(get_url("view_articles.php/")); ?>?<?php se($article, "primary_key", "id"); ?>=<?php se($article, "id"); ?>" class="btn btn-success border-light w-75 text-center">
                             Read Article
@@ -292,8 +240,7 @@ try {
         </div>
     <?php endforeach; ?>
 </div>
-
 <?php
-require(__DIR__ . "/../../partials/flash.php");
+require(__DIR__ . "/../../../partials/flash.php");
 
 ?>

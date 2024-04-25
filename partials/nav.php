@@ -56,7 +56,7 @@ require_once(__DIR__ . "/../lib/functions.php");
                 <?php if (is_logged_in()) : ?>
                     <li class="nav-item"><a class="nav-link" href="<?php echo get_url('home.php'); ?>">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="<?php echo get_url('profile.php'); ?>">Profile</a></li>
-                    <li class="nav-item"><a class="nav-link" href="<?php echo get_url('favorites.php'); ?>">Favorites</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?php echo get_url('favorites.php'); ?>">My Favorites</a></li>
                 <?php endif; ?>
 
                 <?php if (!is_logged_in()) : ?>
@@ -68,7 +68,7 @@ require_once(__DIR__ . "/../lib/functions.php");
                 <!--ROLES-->
                 <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Roles
+                    Manage Roles
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                     <li><a class="dropdown-item" href="<?php echo get_url('admin/create_role.php'); ?>">Create Role</a></li>
@@ -79,12 +79,23 @@ require_once(__DIR__ . "/../lib/functions.php");
                 <!--ARTICLES-->
                 <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Articles
+                Manage Articles
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                     <li><a class="dropdown-item" href="<?php echo get_url('admin/fetch_articles.php'); ?>">Fetch Articles</a></li>
                     <li><a class="dropdown-item" href="<?php echo get_url('admin/create_articles.php'); ?>">Creates Articles</a></li>
                     <li><a class="dropdown-item" href="<?php echo get_url('admin/list_articles.php'); ?>">List Articles</a></li>
+                </ul>
+                </li>
+                <!--ASSOCIATIONS-->
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Manage Favorites
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="<?php echo get_url('admin/assign_favorites.php'); ?>">Assign Favorites</a></li>
+                    <li><a class="dropdown-item" href="<?php echo get_url('admin/all_favorites.php'); ?>">All Associations</a></li>
+                    <li><a class="dropdown-item" href="<?php echo get_url('admin/not_favorited.php'); ?>">Not Associated</a></li>
                 </ul>
                 </li>
 
