@@ -70,29 +70,29 @@ if (isset($_POST["username"])) {
         $query = "SELECT Users.id, username, 
         (SELECT GROUP_CONCAT(' ', ArticlesTable.id, ' (' , IF(ua.is_active = 1,'active','inactive') ,')') from 
         UserArticles ua JOIN ArticlesTable on ua.article_id = ArticlesTable.id WHERE ua.user_id = Users.id";
-    $params = [];
+        $params = [];
 
-    if (isset($_POST["title"])) {
-        //title
-        $title = se($_POST, "title", "", false);
-        if (!empty($title)) {
-            $query .= " AND title like :title";
-            $params[":title"] = "%$title%";
+        if (isset($_POST["title"])) {
+            //title
+            $title = se($_POST, "title", "", false);
+            if (!empty($title)) {
+                $query .= " AND title like :title";
+                $params[":title"] = "%$title%";
+            }
         }
-    }
-    $query .= " LIMIT 25) as articles from Users WHERE username like :username LIMIT 25";
-    $params[":username"] = "%$username%";
-    $stmt = $db->prepare($query);
-    try {
-        $stmt->execute($params);
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if ($results) {
-            $users = $results;
+        $query .= " LIMIT 25) as articles from Users WHERE username like :username LIMIT 25";
+        $params[":username"] = "%$username%";
+        $stmt = $db->prepare($query);
+        try {
+            $stmt->execute($params);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if ($results) {
+                $users = $results;
+            }
+        } catch (PDOException $e) {
+            error_log("Error Fetching Users: " . var_export($e, true));
+            flash("An Error Occured while Fetching Users", "danger");
         }
-    } catch (PDOException $e) {
-        error_log("Error Fetching Users: " . var_export($e, true));
-        flash("An Error Occured while Fetching Users", "danger");
-    }
     } else {
         flash("Username must not be empty", "warning");
     }
@@ -141,6 +141,11 @@ if (isset($_POST["username"])) {
                 <tr>
                     <td>
                         <table class="table">
+                            <?php if (isset($_POST["username"]) && empty($users)) : ?>
+                                <p class="text-center mt-3">No Users Found.</p>
+                            <?php elseif (!isset($_POST["username"]) && empty($users)) :?>
+                                <p class="text-center mt-3">No Filter on Users Set Yet.</p>
+                                <?php endif ;?>
                             <?php foreach ($users as $user) : ?>
                                 <tr>
                                     <td>
@@ -155,6 +160,9 @@ if (isset($_POST["username"])) {
                     </td>
                     <td>
                         <?php $counter = 0; ?>
+                        <?php if (empty($active_articles)) : ?>
+                                <p class="text-center mt-3">No Active Articles Found.</p>
+                            <?php endif; ?>
                         <?php foreach ($active_articles as $article) : ?>
                             <?php $counter++; ?>
                             <div class="<?php if ($counter % 2 === 0) {

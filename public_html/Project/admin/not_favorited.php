@@ -189,6 +189,9 @@ $totalShown = count($results); //counts total shown
         </form>
     </div>
 </div>
+<?php if (empty($results)) : ?>
+                                <p class="text-center mt-3">No Articles Found.</p>
+                            <?php endif; ?>
 <!--CARD ARTICLE DISPLAYING-->
 <div class="row row-cols-1 row-cols-lg-4 row-cols-sm-2 g-4 mx-auto">
     <?php foreach ($results as $article) : ?>

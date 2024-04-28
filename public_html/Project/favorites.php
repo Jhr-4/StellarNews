@@ -1,5 +1,6 @@
 <?php
 require(__DIR__ . "/../../partials/nav.php");
+is_logged_in(true);
 ?>
 
 <?php
@@ -11,8 +12,7 @@ $form = [
     ["type" => "datetime-local", "id" => "MAX_timestamp", "name" => "MAX_timestamp", "label" => "Article Uploaded Before", "include_margin" => false],
     ["type" => "datetime-local", "id" => "MIN_timestamp", "name" => "MIN_timestamp", "label" => "Article Upload After", "include_margin" => false],
 
-    //["type" => "select", "name" => "sort", "label" => "Sort", "options" => ["created" => "Date"], "include_margin" => false],
-    ["type" => "select", "class" => "test", "name" => "order", "label" => "Order", "options" => ["desc" => "Newest", "asc" => "Oldest"], "include_margin" => false],
+    ["type" => "select", "name" => "order", "label" => "Order Favorited", "options" => ["desc" => "Newest", "asc" => "Oldest"], "include_margin" => false],
 
     ["type" => "number", "name" => "limit", "label" => "Limit", "value" => "10", "placeholder" => "10", "include_margin" => false],
 ];
@@ -80,12 +80,12 @@ if (count($_GET) > 0) { //if theres _GET
     }
 
     //sort and order SORT ISN"T THERE SO IT SHOULD JUST BE CREATED ALWAYS.
-    $sort = se($_GET, "sort", "created", false);
-    if (!in_array($sort, ["api_id", "created"])) {
-        $sort = "created";
+    $sort = se($_GET, "sort", "modified", false);
+    if (!in_array($sort, ["api_id", "modified"])) {
+        $sort = "modified";
     }
-    if ($sort === "created" || $sort === "api_id") {
-        $sort = "ArticlesTable." . $sort;
+    if ($sort === "modified" || $sort === "api_id") {
+        $sort = "UserArticles." . $sort;
     }
     $order = se($_GET, "order", "desc", false);
     if (!in_array($order, ["asc", "desc"])) {
