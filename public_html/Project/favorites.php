@@ -22,7 +22,7 @@ $form = [
 $query = "SELECT ArticlesTable.id, title, site_url, image_url, news_text, news_summary_long, ArticlesTable.is_active, UserArticles.user_id, UserArticles.is_active AS userArticle_isActive 
 FROM  `ArticlesTable` 
 LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id 
-WHERE UserArticles.user_id = :user_id AND UserArticles.is_active";
+WHERE UserArticles.user_id = :user_id AND UserArticles.is_active AND ArticlesTable.is_active";
 
 $params = [];
 $params[":user_id"] = get_user_id();
@@ -140,10 +140,12 @@ $totalShown = count($results); //counts total shown
 
 
 //COUNTING TOTAL FAVORITED
-$totalFavorited = get_total_count("`ArticlesTable` 
-                                    LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id
-                                    WHERE UserArticles.user_id = :user_id AND UserArticles.is_active",
-                                    ["user_id"=>get_user_id()]);
+$totalFavorited = get_total_count(
+    "`ArticlesTable` 
+        LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id
+        WHERE UserArticles.user_id = :user_id AND UserArticles.is_active AND ArticlesTable.is_active",
+    ["user_id" => get_user_id()]
+);
 /* ORIGINAL CODE before DB HELPER
 $query2 = "SELECT count(ArticlesTable.id) as totalFav FROM  `ArticlesTable` 
 LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id 
@@ -254,30 +256,17 @@ try {
                     </h6>
 
                     <div class="text-center mt-auto">
-
-                        <!--CLICK TO FAVORITE (White Heart becomes Red); IF NOT EXIST IN TABLE, LINK = ?ARTICLE_ID-->
-                        <?php if (($article["user_id"]) === "N/A") /*"N/A" b/c values being set to N/A if it's null earlier*/ : ?>
-                            <a class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Favorite" href="<?php echo get_url('api/favorite_articles.php?article_id=' . $article["id"]); ?>">
+                        <a class="btn btn-danger border-light" data-toggle="tooltip" data-placement="top" title="Favorite" href="<?php echo get_url('api/favorite_articles.php?article_id=' . $article["id"]); ?>">
+                            <?php if (($article["user_id"]) === "N/A" || $article["userArticle_isActive"] === 0) /*"N/A" b/c values being set to N/A if it's null earlier*/ : ?>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
                                     <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1" />
                                 </svg>
-                            </a>
-                        <?php else : ?>
-                            <!--Else IT EXSITS => TOGGLE, LINK = ?TOGGEL_ARTICLE_ID-->
-                            <a class="btn btn-danger border-light" data-toggle="tooltip" data-placement="top" title="Unfavorite" href="<?php echo get_url('api/favorite_articles.php?toggle_article_id=' . $article["id"]); ?>">
-                                <!--1 = ACTIVE FAVORITE = CLICK TO UNFAVORITE (RED Heart Becomes White)-->
-                                <?php if ($article["userArticle_isActive"] === 1) : ?>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-heart" viewBox="0 0 16 16">
-                                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15" />
-                                    </svg>
-                                <?php else : ?>
-                                    <!--ELSE IT'S 0 = NOT ACTIVE FAVORITE = CLICK TO FAVORITE (White Heart Becomes Red)-->
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
-                                        <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1" />
-                                    </svg>
-                                <?php endif; ?>
-                            </a>
-                        <?php endif; ?>
+                            <?php else : ?>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-heart" viewBox="0 0 16 16">
+                                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15" />
+                                </svg>
+                            <?php endif; ?>
+                        </a>
 
                         <!--SINGLE VIEW-->
                         <a href="<?php se(get_url("view_articles.php/")); ?>?<?php se($article, "primary_key", "id"); ?>=<?php se($article, "id"); ?>" class="btn btn-success border-light w-75 text-center">
