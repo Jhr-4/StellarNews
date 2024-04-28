@@ -19,6 +19,7 @@ $can_edit = isset($_GET["edit"]);
 
 <?php
 if ($is_self && $can_edit && isset($_POST["save"])) {
+    error_log("hey");
     $email = se($_POST, "email", null, false);
     $username = se($_POST, "username", null, false);
     $hasError = false;
@@ -39,7 +40,7 @@ if ($is_self && $can_edit && isset($_POST["save"])) {
         $stmt = $db->prepare("UPDATE Users set email = :email, username = :username where id = :id");
         try {
             $stmt->execute($params);
-            flash("Profile saved", "success");
+            flash("Profile Email/Username Saved", "success");
         } catch (PDOException $e) {
             users_check_duplicate($e->errorInfo);
         }
@@ -133,13 +134,14 @@ if ($user_id > 0) {
     <?php if ($is_self && $can_edit) : ?>
         <form onsubmit="return validate(this)" method="POST">
             <h2>Email/Username</h2>
-            <?php render_input(["type" => "email", "id" => "email", "name" => "email", "label" => "Email", "rules" => ["required" => true]]); ?>
-            <?php render_input(["type" => "text", "id" => "username", "name" => "username", "label" => "Username", "rules" => ["required" => true, "maxlength" => 30]]); ?>
+            <?php render_input(["type" => "email", "id" => "email", "name" => "email", "value"=>se($user, "email", "", false), "label" => "Email", "rules" => ["required" => true]]); ?>
+            <?php render_input(["type" => "text", "id" => "username", "name" => "username", "value"=>se($user, "username", "", false),"label" => "Username", "rules" => ["required" => true, "maxlength" => 30]]); ?>
             <hr>
             <h2>Password</h2>
-            <?php render_input(["type" => "password", "id" => "cp", "name" => "currentPassword", "label" => "Current Password", "rules" => ["required" => true, "minlength" => 8]]); ?>
-            <?php render_input(["type" => "password", "id" => "np", "name" => "newPassword", "label" => "New Password", "rules" => ["required" => true, "minlength" => 8]]); ?>
-            <?php render_input(["type" => "password", "id" => "comp", "name" => "confirmPassword", "label" => "Confirm Password", "rules" => ["required" => true, "minlength" => 8]]); ?>
+            <?php render_input(["type" => "password", "id" => "cp", "name" => "currentPassword", "label" => "Current Password", "rules" => ["minlength" => 8]]); ?>
+            <?php render_input(["type" => "password", "id" => "np", "name" => "newPassword", "label" => "New Password", "rules" => ["minlength" => 8]]); ?>
+            <?php render_input(["type" => "password", "id" => "comp", "name" => "confirmPassword", "label" => "Confirm Password", "rules" => ["minlength" => 8]]); ?>
+            <?php render_input(["type" => "hidden", "name" => "save"]);/*lazy value to check if form submitted, not ideal*/ ?>
             <?php render_button(["text" => "Update Profile", "type" => "submit"]); ?>
             <a class="btn btn-secondary" href="?">View</a>
         </form>

@@ -13,31 +13,48 @@ if (isset($_POST["users"]) && isset($_POST["articles"])) {
     $user_ids = $_POST["users"];
     $article_ids = $_POST["articles"];
     if (empty($user_ids) || empty($article_ids)) {
-        flash("Both users and articles need to be selected", "warning");
+        flash("Users and articles should not be empty", "warning");
     } else {
-        //for sake of simplicity, this will be a tad inefficient
         $db = getDB();
-        $stmt = $db->prepare("INSERT INTO UserArticles (user_id, article_id, is_active) VALUES (:userID, :articleID, 1) 
-        ON DUPLICATE KEY UPDATE is_active = !is_active");
+        $query = "INSERT INTO UserArticles (user_id, article_id, is_active) VALUES ";
+        $params = [];
+        $counterUSERS = 0;
         foreach ($user_ids as $userID) {
+            $counterUSERS++;
+            $counterARTICLES = 0;
             foreach ($article_ids as $articleID) {
-                try {
-                    $stmt->execute([":userID" => $userID, ":articleID" => $articleID]);
-                    flash("Updated Article Favorites", "success");
-                } catch (PDOException $e) {
-                    error_log("Error Applying Association: " . var_export($e, true));
-                    flash("An Error Occured While Toggling Favorites", "danger");
-                }
+                $counterARTICLES++;
+                $query .= "(:userID$counterUSERS";
+                $params[":userID$counterUSERS"] = $userID;
+                $query .= ", :articleID$counterARTICLES";
+                $params[":articleID$counterARTICLES"] = $articleID;
+                $query .= ", 1),";
             }
         }
+        $query = rtrim($query, ","); //removes the last extra comma
+        $query .= " ON DUPLICATE KEY UPDATE is_active = !is_active";
+        /*echo "<pre>";
+        var_dump($query);
+        var_dump($params);
+        echo "</pre>";*/
+        try {
+            $stmt = $db->prepare($query);
+            $stmt->execute($params);
+            flash("Updated Article Favorites", "success");
+        } catch (PDOException $e) {
+            error_log("Error Applying Association: " . var_export($e, true));
+            flash("An Error Occured While Toggling Favorites", "danger");
+        }
     }
+} else if (isset($_POST["users"]) || isset($_POST["articles"])) { //if just one is set
+    flash("BOTH Users and articles must be selected", "warning");
 }
 
 //get active articles
 $active_articles = [];
 $db = getDB();
-$query = "SELECT ArticlesTable.id, title, ArticlesTable.is_active, UserArticles.user_id, UserArticles.is_active AS userArticle_isActive FROM  `ArticlesTable` 
-LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id AND UserArticles.is_active WHERE 1=1";
+$query = "SELECT DISTINCT ArticlesTable.id, title FROM  `ArticlesTable` 
+LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id WHERE ArticlesTable.is_active = true";
 $params = [];
 $title = "";
 if (isset($_POST["title"])) {
@@ -132,6 +149,8 @@ if (isset($_POST["username"])) {
         <?php if (isset($title) && !empty($title)) : ?>
             <input type="hidden" name="title" value="<?php se($title, false); ?>" />
         <?php endif; ?>
+        <button type="submit" class="btn btn-danger mb-3">Toggle Favorites</button>
+
         <table class="table">
             <thead>
                 <th style="width:50dvw;">Users [Article ID]</th>
@@ -143,9 +162,9 @@ if (isset($_POST["username"])) {
                         <table class="table">
                             <?php if (isset($_POST["username"]) && empty($users)) : ?>
                                 <p class="text-center mt-3">No Users Found.</p>
-                            <?php elseif (!isset($_POST["username"]) && empty($users)) :?>
+                            <?php elseif (!isset($_POST["username"]) && empty($users)) : ?>
                                 <p class="text-center mt-3">No Filter on Users Set Yet.</p>
-                                <?php endif ;?>
+                            <?php endif; ?>
                             <?php foreach ($users as $user) : ?>
                                 <tr>
                                     <td>
@@ -161,8 +180,8 @@ if (isset($_POST["username"])) {
                     <td>
                         <?php $counter = 0; ?>
                         <?php if (empty($active_articles)) : ?>
-                                <p class="text-center mt-3">No Active Articles Found.</p>
-                            <?php endif; ?>
+                            <p class="text-center mt-3">No Active Articles Found.</p>
+                        <?php endif; ?>
                         <?php foreach ($active_articles as $article) : ?>
                             <?php $counter++; ?>
                             <div class="<?php if ($counter % 2 === 0) {
@@ -178,7 +197,6 @@ if (isset($_POST["username"])) {
                 </tr>
             </tbody>
         </table>
-        <?php render_button(["text" => "Toggle Favorites", "type" => "submit", "color" => "danger"]); ?>
     </form>
 </div>
 <?php
