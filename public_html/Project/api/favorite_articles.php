@@ -3,6 +3,7 @@
 
 require(__DIR__ . "/../../../lib/functions.php");
 session_start();
+is_logged_in(true);
 
 //(UN)FAVORITE INDIVIDUAL ARTICLES
 if(isset($_GET["article_id"]) && is_logged_in()){ //IF NOT IN TABLE, ADD IT
@@ -21,7 +22,7 @@ if(isset($_GET["article_id"]) && is_logged_in()){ //IF NOT IN TABLE, ADD IT
         $stmt = $db->prepare("UPDATE `UserArticles` SET is_active = !is_active WHERE user_id = :user_id AND article_id = :toggle_article_id");
         try {
             $stmt->execute([":user_id"=>get_user_id(), ":toggle_article_id"=>$_GET["toggle_article_id"]]);
-            flash("Retoggled Article Favorite", "success");
+            flash("Updated Article Favorite", "success");
         } catch (PDOException $e) {
             flash("An Error Occured Toggling Favorite", "danger");
             error_log(var_export($e->errorInfo, true));
@@ -65,6 +66,6 @@ if (isset($_POST["users"]) && isset($_POST["roles"])) {
 }
 
 
-redirect("home.php");
+redirect("favorites.php");
 
 ?>

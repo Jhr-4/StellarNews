@@ -228,7 +228,9 @@ $totalShown = count($results); //counts total shown
         </form>
     </div>
 </div>
-
+<?php if (empty($results)) :?>
+        <p class="text-center mt-3">No results found.</p>
+  <?php endif; ?>
 <!--CARD ARTICLE DISPLAYING-->
 <div class="row row-cols-1 row-cols-lg-4 row-cols-sm-2 g-4 mx-auto">
     <?php foreach ($results as $article) : ?>
@@ -269,7 +271,7 @@ $totalShown = count($results); //counts total shown
                         <p class="h6 text-light">[<?php se(count($article_titles[$article["title"]])) ?>] Associated Users:
                             <?php foreach ($article_titles[$article["title"]] as $articleUserInfo) : ?>
                                 <input id="user_<?php se($articleUserInfo['user_id'], 'id'); ?>" type="checkbox" name="users[]" value="<?php se(se($articleUserInfo['user_id']), 'id'); ?>" />
-                                <a style="font-weight: normal;" class="text-info" href="<?php se(get_url("profile.php/")); ?>?<?php se($articleUserInfo['user_id']); ?>">
+                                <a style="font-weight: normal;" class="text-info" href="<?php se(get_url("profile.php/")); ?>?id=<?php se($articleUserInfo['user_id']); ?>">
                                     <?php se($articleUserInfo['username']) ?></a> |
                             <?php endforeach; ?>
                         </p>
