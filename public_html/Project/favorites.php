@@ -19,7 +19,7 @@ $form = [
 //LOADING  ARTICLES
 
 
-$query = "SELECT ArticlesTable.id, title, site_url, image_url, news_text, news_summary_long, ArticlesTable.is_active, UserArticles.user_id, UserArticles.is_active AS userArticle_isActive 
+$query = "SELECT ArticlesTable.id, title, site_url, image_url, ArticlesTable.is_active, UserArticles.user_id, UserArticles.is_active AS userArticle_isActive 
 FROM  `ArticlesTable` 
 LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id 
 WHERE UserArticles.user_id = :user_id AND UserArticles.is_active AND ArticlesTable.is_active";
@@ -108,6 +108,8 @@ if (count($_GET) > 0) { //if theres _GET
     $sort = "ArticlesTable.created";
     $order = "desc";
     $query .= " ORDER BY $sort $order";
+    $limit = 16; 
+    $query .= " LIMIT $limit";
 }
 
 $db = getDB();
@@ -203,7 +205,6 @@ try {
 <!-- DELETE ALL-->
 <script>
     function unfavoriteAll() {
-        console.log("hey");
         if (confirm("Are you sure you want to unfavorite everything?")) {
             window.location.href = 'api/favorite_articles.php?toggle_all';
         } else {
@@ -219,7 +220,7 @@ try {
         </svg>
         Unfavorite All
     </button>
-</div>
+</div> 
 
 <!--CARD ARTICLE DISPLAYING-->
 <div class="row row-cols-1 row-cols-lg-4 row-cols-sm-2 g-4 mx-auto">

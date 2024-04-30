@@ -141,10 +141,12 @@ if (count($_GET) > 0) { //if theres _GET
         $limit = 10;
     }
     $query .= " LIMIT $limit";
-} else { //IF No Session data loaded && no filters -> user will see leatest articles first  
+} else { //IF No Session data loaded && no filters -> user will see leatest articles first
     $sort = "ArticlesTable.created";
     $order = "desc";
     $query .= " ORDER BY $sort $order";
+    $limit = 16; 
+    $query .= " LIMIT $limit";
 }
 
 $db = getDB();
