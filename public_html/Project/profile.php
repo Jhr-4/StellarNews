@@ -2,8 +2,24 @@
 require_once(__DIR__ . "/../../partials/nav.php");
 is_logged_in(true);
 ?>
+
 <?php
-if (isset($_POST["save"])) {
+$user_id = -1;
+try {
+    $user_id = (int)se($_GET, "id", -1, false);
+} catch (Exception $e) {
+}
+if ($user_id < 1) {
+    $user_id = get_user_id();
+}
+$is_self = $user_id == get_user_id();
+$can_edit = isset($_GET["edit"]);
+
+?>
+
+<?php
+if ($is_self && $can_edit && isset($_POST["save"])) {
+    error_log("hey");
     $email = se($_POST, "email", null, false);
     $username = se($_POST, "username", null, false);
     $hasError = false;
@@ -24,7 +40,7 @@ if (isset($_POST["save"])) {
         $stmt = $db->prepare("UPDATE Users set email = :email, username = :username where id = :id");
         try {
             $stmt->execute($params);
-            flash("Profile saved", "success");
+            flash("Profile Email/Username Saved", "success");
         } catch (PDOException $e) {
             users_check_duplicate($e->errorInfo);
         }
@@ -90,23 +106,67 @@ if (isset($_POST["save"])) {
 ?>
 
 <?php
-$email = get_user_email();
-$username = get_username();
+$user = [];
+if ($user_id > 0) {
+    $db = getDB();
+    $query = "SELECT email, username, Users.created, 
+    (SELECT GROUP_CONCAT(name) from 
+    UserRoles JOIN Roles on UserRoles.role_id = Roles.id WHERE UserRoles.user_id = Users.id AND UserRoles.is_active = 1) as roles
+    FROM Users
+    WHERE Users.id= :user_id";
+
+    try {
+        $stmt = $db->prepare($query);
+        $stmt->execute([":user_id" => $user_id]);
+        $r = $stmt->fetch();
+        if ($r) {
+            $user = $r;
+        } else {
+            flash("Couldn't find user profile", "danger");
+        }
+    } catch (PDOException $error) {
+        error_log("Error fetching user: " . $error);
+        flash("An error occured fetcing the user", "danger");
+    }
+}
 ?>
 <div class="container-fluid">
-    
-    <form onsubmit="return validate(this)" method="POST">
-        <h2>Email/Username</h2>
-        <?php render_input(["type"=>"email", "id"=>"email", "name"=>"email", "label"=>"Email", "rules"=>["required"=>true]]);?>
-        <?php render_input(["type"=>"text", "id"=>"username", "name"=>"username", "label"=>"Username", "rules"=>["required"=>true, "maxlength"=>30]]);?>
-        <hr>
-        <h2>Password</h2>
-        <?php render_input(["type"=>"password", "id"=>"cp", "name"=>"currentPassword", "label"=>"Current Password", "rules"=>["required"=>true, "minlength"=>8]]);?>
-        <?php render_input(["type"=>"password", "id"=>"np", "name"=>"newPassword", "label"=>"New Password", "rules"=>["required"=>true,"minlength"=>8]]);?>
-        <?php render_input(["type"=>"password", "id"=>"comp", "name"=>"confirmPassword", "label"=>"Confirm Password", "rules"=>["required"=>true,"minlength"=>8]]);?>
-        <?php render_button(["text"=>"Update Profile", "type"=>"submit"]);?>
-    </form>
-    
+    <?php if ($is_self && $can_edit) : ?>
+        <form onsubmit="return validate(this)" method="POST">
+            <h2>Email/Username</h2>
+            <?php render_input(["type" => "email", "id" => "email", "name" => "email", "value"=>se($user, "email", "", false), "label" => "Email", "rules" => ["required" => true]]); ?>
+            <?php render_input(["type" => "text", "id" => "username", "name" => "username", "value"=>se($user, "username", "", false),"label" => "Username", "rules" => ["required" => true, "maxlength" => 30]]); ?>
+            <hr>
+            <h2>Password</h2>
+            <?php render_input(["type" => "password", "id" => "cp", "name" => "currentPassword", "label" => "Current Password", "rules" => ["minlength" => 8]]); ?>
+            <?php render_input(["type" => "password", "id" => "np", "name" => "newPassword", "label" => "New Password", "rules" => ["minlength" => 8]]); ?>
+            <?php render_input(["type" => "password", "id" => "comp", "name" => "confirmPassword", "label" => "Confirm Password", "rules" => ["minlength" => 8]]); ?>
+            <?php render_input(["type" => "hidden", "name" => "save"]);/*lazy value to check if form submitted, not ideal*/ ?>
+            <?php render_button(["text" => "Update Profile", "type" => "submit"]); ?>
+            <a class="btn btn-secondary" href="?">View</a>
+        </form>
+    <?php else : ?>
+        <?php if (isset($user) && !empty($user)) : ?>
+            <div class="card mb-3 col-auto col-sm-5 col-lg-4 col-xl-3 mx-auto">
+                <div class="card-header p-0">
+                    <?php $colors = array("danger", "info", "warning", "secondary", "success", "primary", "dark"); ?>
+                    <h5 class="mx-auto text-center text-bg-<?php se($colors[rand(0, 6)]) ?> rounded-circle m-3" style="height:10em; width:10em; padding-top:4.25em;"> <?php se($user, "username", "N/A"); ?> </h5>
+                </div>
+                <div class="card-body mx-auto text-center">
+                    <h5 class="card-title">User: <?php se($user, "username", "Not Found"); ?></h5>
+                    <?php if (isset($user["roles"])) : ?>
+                        <p class="card-text">Roles: <?php se($user, "roles"); ?></p>
+                    <?php endif; ?>
+                    <p class="card-text">Joined: <?php se($user, "created", "Not Found"); ?></p>
+                    <?php if ($is_self) : ?>
+                        <a class="btn btn-primary" href="?edit">Edit Profile</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php else :?>
+            <h5 class="card mx-auto p-5 text-center text-danger">Invalid ID Passed</h5>
+        <?php endif;?>
+    <?php endif ?>
 </div>
 
 <script>
@@ -122,51 +182,51 @@ $username = get_username();
 
         //example of using flash via javascript
         //find the flash container, create a new element, appendChild
-       
+
         //email
-        if (email === ""){
+        if (email === "") {
             flash("[Client] An eamil must be provided.", "danger");
             isValid = false;
         }
-        if (email !== "" && !/^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})*$/.test(email)){
+        if (email !== "" && !/^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})*$/.test(email)) {
             flash("[Client] Invalid email address.", "danger");
             isValid = false;
         }
 
         //username
-        if (username === ""){
+        if (username === "") {
             flash("[Client] An username must be provided.", "danger");
             isValid = false;
         }
-        if (username !== "" && !/^[a-z0-9_-]{3,16}$/.test(username)){
+        if (username !== "" && !/^[a-z0-9_-]{3,16}$/.test(username)) {
             flash("[Client] Username must only contain 3-16 alphanumeric characters, underscores, or dashes.", "danger");
             isValid = false;
         }
 
         //password
-        if (newPassword !== "" || confirmPassword !=="" || currentPassword !==""){ //if any password has text, user trying to change pass
-            if (currentPassword === ""){
+        if (newPassword !== "" || confirmPassword !== "" || currentPassword !== "") { //if any password has text, user trying to change pass
+            if (currentPassword === "") {
                 flash("[Client] Current password must be provided.", "danger");
                 isValid = false;
             }
-            if (currentPassword.length < 8){
+            if (currentPassword.length < 8) {
                 flash("[Client] Current password is invalid.", "danger"); //current password should be atleast 8.
                 isValid = false;
             }
-            if (newPassword === ""){
+            if (newPassword === "") {
                 flash("[Client] A new password must be provided.", "danger");
                 isValid = false;
             }
-            if (confirmPassword === ""){
+            if (confirmPassword === "") {
                 flash("[Client] A confirm password must be provided.", "danger");
                 isValid = false;
             }
-            if ((newPassword !== "" && confirmPassword !== "") && newPassword !== confirmPassword) { 
+            if ((newPassword !== "" && confirmPassword !== "") && newPassword !== confirmPassword) {
                 //only occurs if both password filled; if one feild is empty the message to fill them is already displayed so this is unnecessary
                 flash("[Client] Password and Confrim password must match", "danger");
                 isValid = false;
             }
-            if ((newPassword !== "" || confirmPassword !="") && (newPassword.length < 8 || confirmPassword.length < 8)){
+            if ((newPassword !== "" || confirmPassword != "") && (newPassword.length < 8 || confirmPassword.length < 8)) {
                 //tells the user if the password is to short if they attempt to change using any feild
                 flash("[Client] New password too short.", "danger");
                 isValid = false;
