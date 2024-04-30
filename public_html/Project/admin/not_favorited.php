@@ -24,7 +24,7 @@ $form = [
     ["type" => "number", "name" => "limit", "label" => "Limit", "value" => "10", "placeholder" => "10", "include_margin" => false],
 ];
 //LOADING  ARTICLES
-$query = "SELECT DISTINCT title, ArticlesTable.id, site_url, image_url, news_text, news_summary_long, ArticlesTable.is_active, UserArticles.is_active AS userArticle_isActive, ArticlesTable.created, ArticlesTable.api_id
+$query = "SELECT DISTINCT title, ArticlesTable.id, site_url, image_url, ArticlesTable.is_active, UserArticles.is_active AS userArticle_isActive, ArticlesTable.created, ArticlesTable.api_id
 FROM  `ArticlesTable` 
 LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id AND UserArticles.is_active
 WHERE UserArticles.is_active IS NULL";
@@ -112,6 +112,8 @@ if (count($_GET) > 0) { //if theres _GET
     $sort = "ArticlesTable.created";
     $order = "desc";
     $query .= " ORDER BY $sort $order";
+    $limit = 16; 
+    $query .= " LIMIT $limit";
 }
 
 $db = getDB();

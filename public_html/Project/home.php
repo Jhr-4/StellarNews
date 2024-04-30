@@ -51,7 +51,7 @@ $form = [
 //LOADING  ARTICLES
 
 //QUERY selects ALL articles from articles tables and left joins to userArticles where there's a article/user linked AND the user id is of the user.
-$query = "SELECT ArticlesTable.id, title, site_url, image_url, news_text, news_summary_long, ArticlesTable.is_active, UserArticles.user_id, UserArticles.is_active AS userArticle_isActive FROM  `ArticlesTable` 
+$query = "SELECT ArticlesTable.id, title, site_url, image_url, ArticlesTable.is_active, UserArticles.user_id, UserArticles.is_active AS userArticle_isActive FROM  `ArticlesTable` 
 LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id AND UserArticles.user_id = :user_id WHERE 1=1 AND ArticlesTable.is_active";
 $params = [];
 $params[":user_id"] = get_user_id();
@@ -137,6 +137,8 @@ if (count($_GET) > 0) { //if theres _GET
   $sort = "ArticlesTable.created";
   $order = "desc";
   $query .= " ORDER BY $sort $order";
+  $limit = 16; 
+  $query .= " LIMIT $limit";
 }
 
 $db = getDB();

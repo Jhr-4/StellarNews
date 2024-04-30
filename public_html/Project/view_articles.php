@@ -68,7 +68,7 @@ if($article){
     <?php else :?>
         <a class="btn btn-primary mb-3" href="<?php echo get_url('home.php'); ?>">Return To Home</a>
     <?php endif ?>
-    <div class="card mx-auto w-75 mb-3 shadow p-3 mb-5 bg-body rounded">
+    <div class="card mx-auto px-1 col-xl-8 col-lg-10 col-sm-12 shadow-sm p-3 mb-5 rounded " style="background-color:rgb(206, 228, 228, .9);">
         <div class="card-body">
             <!--TITLE-->
             <h3 class="card-title"><?php se($article, "title", "Unknown"); ?></h3>

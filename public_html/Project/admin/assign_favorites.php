@@ -53,8 +53,7 @@ if (isset($_POST["users"]) && isset($_POST["articles"])) {
 //get active articles
 $active_articles = [];
 $db = getDB();
-$query = "SELECT DISTINCT ArticlesTable.id, title FROM  `ArticlesTable` 
-LEFT JOIN `UserArticles` on ArticlesTable.id = UserArticles.article_id WHERE ArticlesTable.is_active = true";
+$query = "SELECT DISTINCT ArticlesTable.id, title FROM `ArticlesTable` WHERE ArticlesTable.is_active = true";
 $params = [];
 $title = "";
 if (isset($_POST["title"])) {
@@ -63,7 +62,10 @@ if (isset($_POST["title"])) {
     if (!empty($title)) {
         $query .= " AND title like :title LIMIT 25";
         $params[":title"] = "%$title%";
-    }
+    } 
+} else {
+    $limit = 25; 
+    $query .= " LIMIT $limit";
 }
 $stmt = $db->prepare($query);
 try {
