@@ -4,7 +4,7 @@ require(__DIR__ . "/../../../partials/nav.php");
 
 if (!has_role("Admin")) {
     flash("You don't have permission to view this page", "warning");
-    die(header("Location: " . get_url("home.php")));
+    redirect("home.php");
 }
 ?>
 <?php
@@ -46,7 +46,7 @@ if(isset($_POST["articleDays"])){
             unset($article["news_summary_short"]);
             unset($article["hashtags"]);
             foreach ($article as $k => $v) { //extra unsetting just incase they add more unwanted api data someday...
-                if (!in_array($k, ["title", "site_url", "image_url", "news_text", "news_summary_long"])) {
+                if (!in_array($k, ["api_id", "api_timestamp", "title", "site_url", "image_url", "news_text", "news_summary_long"])) {
                     unset($article[$k]);
                 }
             }

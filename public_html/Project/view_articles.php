@@ -25,9 +25,9 @@ if ($id>-1){
 } else {
         flash("Invalid id passed", "danger");
         if(has_role('Admin')){
-            die(header("Location:" . get_url("admin/list_articles.php")));
+            redirect("admin/list_articles.php");
         } else {
-            die(header("Location:" . get_url("home.php")));
+            redirect("home.php");
         }
 }
 
@@ -44,15 +44,15 @@ if($article){
         $article['is_active'] = "False";
         if (!has_role("Admin")){//Boots non-admin users out of page... JUST INCASE it was shared link..
             flash("Article has been disabled.", "danger");
-            die(header("Location:" . get_url("home.php")));
+            redirect("home.php");
         }
     }
 } else {
     flash("Invalid id passed", "danger");
     if(has_role('Admin')){
-        die(header("Location:" . get_url("admin/list_articles.php")));
+        redirect("admin/list_articles.php");
     } else {
-        die(header("Location:" . get_url("home.php")));
+        redirect("home.php");
     }
 }
 
@@ -68,7 +68,7 @@ if($article){
     <?php else :?>
         <a class="btn btn-primary mb-3" href="<?php echo get_url('home.php'); ?>">Return To Home</a>
     <?php endif ?>
-    <div class="card mx-auto w-75 mb-3 shadow p-3 mb-5 bg-body rounded">
+    <div class="card mx-auto px-1 col-xl-8 col-lg-10 col-sm-12 shadow-sm p-3 mb-5 rounded " style="background-color:rgb(206, 228, 228, .9);">
         <div class="card-body">
             <!--TITLE-->
             <h3 class="card-title"><?php se($article, "title", "Unknown"); ?></h3>
