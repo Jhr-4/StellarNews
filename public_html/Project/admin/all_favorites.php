@@ -112,7 +112,7 @@ if (count($_GET) > 0) { //if theres _GET
     }
     $MIN_timestamp = se($_GET, "MIN_timestamp", "", false);
     if (!empty($MIN_timestamp) && $MIN_timestamp >= 0) {
-        $query .= " AND ArticlesTable.created <= :MIN_timestamp";
+        $query .= " AND ArticlesTable.created >= :MIN_timestamp";
         $params[":MIN_timestamp"] = $MIN_timestamp;
     }
 
